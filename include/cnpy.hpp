@@ -3,8 +3,8 @@
 // license available in LICENSE file, or at
 // http://www.opensource.org/licenses/mit-license.php
 
-#ifndef LIBCNPY_H_
-#define LIBCNPY_H_
+#ifndef LIBCNPY_HPP
+#define LIBCNPY_HPP
 
 #include <cassert>
 #include <cstdio>
