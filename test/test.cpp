@@ -4,22 +4,24 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <map>
+#include <random>
 #include <string>
 
-const int nx = 128;
-const int ny = 64;
-const int nz = 32;
+constexpr int nx = 128;
+constexpr int ny = 64;
+constexpr int nz = 32;
 
 constexpr auto npy_file = "../test/data/test_load.npy";
 constexpr auto npz_file = "../test/data/test_load.npz";
 
 auto get_data() {
   // set random seed so that result is reproducible (for testing)
-  srand(0);
+  std::mt19937 generator(0);
+  std::uniform_real_distribution<double> distribution(0.0, 1.0);
 
   std::vector<std::complex<double>> data(nx * ny * nz);
   for (int i = 0; i < nx * ny * nz; i++)
-    data[i] = std::complex<double>(rand(), rand());
+    data[i] = std::complex<double>(distribution(generator), distribution(generator));
 
   return data;
 }
@@ -44,7 +46,7 @@ TEST(NpySave, Npy) {
 
   // load it into a new array
   cnpy::npy_array arr = cnpy::npy_load("arr1.npy");
-  std::complex<double> *loaded_data = arr.data<std::complex<double>>();
+  auto *loaded_data = arr.data<std::complex<double>>();
 
   // make sure the loaded data matches the saved data
   ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
@@ -65,7 +67,7 @@ TEST(NpyAppend, Npy) {
   expected.insert(expected.end(), data.begin(), data.end());
 
   cnpy::npy_array arr = cnpy::npy_load("arr1.npy");
-  std::complex<double> *loaded_data = arr.data<std::complex<double>>();
+  auto *loaded_data = arr.data<std::complex<double>>();
 
   ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
   ASSERT_TRUE(arr.shape.size() == 3 && arr.shape[0] == nz + nz &&
@@ -147,7 +149,7 @@ TEST(NpzSave, Npz) {
 
   // check that the loaded myVar1 matches myVar1
   cnpy::npy_array arr_mv1 = my_npz["my_var1"];
-  double *mv1 = arr_mv1.data<double>();
+  auto *mv1 = arr_mv1.data<double>();
   ASSERT_TRUE(arr_mv1.shape.size() == 1 && arr_mv1.shape[0] == 1);
   ASSERT_EQ(mv1[0], my_var1);
 }

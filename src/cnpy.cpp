@@ -11,7 +11,7 @@
 #include <iomanip>
 #include <regex>
 #include <stdexcept>
-#include <stdint.h>
+#include <cstdint>
 
 char cnpy::big_endian_test() {
   int x = 1;
@@ -229,11 +229,11 @@ cnpy::npy_array load_the_npz_array(FILE *fp, uint32_t compr_bytes,
   int err;
   z_stream d_stream;
 
-  d_stream.zalloc = Z_NULL;
-  d_stream.zfree = Z_NULL;
-  d_stream.opaque = Z_NULL;
+  d_stream.zalloc = nullptr;
+  d_stream.zfree = nullptr;
+  d_stream.opaque = nullptr;
   d_stream.avail_in = 0;
-  d_stream.next_in = Z_NULL;
+  d_stream.next_in = nullptr;
   err = inflateInit2(&d_stream, -MAX_WBITS);
 
   d_stream.avail_in = compr_bytes;
@@ -268,7 +268,7 @@ cnpy::npz_t cnpy::npz_load(std::string fname) {
 
   cnpy::npz_t arrays;
 
-  while (1) {
+  while (true) {
     std::vector<char> local_header(30);
     size_t headerres = fread(&local_header[0], sizeof(char), 30, fp);
     if (headerres != 30)
@@ -319,7 +319,7 @@ cnpy::npy_array cnpy::npz_load(std::string fname, std::string varname) {
   if (!fp)
     throw std::runtime_error("npz_load: Unable to open file " + fname);
 
-  while (1) {
+  while (true) {
     std::vector<char> local_header(30);
     size_t header_res = fread(&local_header[0], sizeof(char), 30, fp);
     if (header_res != 30)

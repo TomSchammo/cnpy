@@ -14,7 +14,7 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -27,13 +27,12 @@ struct npy_array {
             bool _fortran_order)
       : shape(_shape), word_size(_word_size), fortran_order(_fortran_order) {
     num_vals = 1;
-    for (size_t i = 0; i < shape.size(); i++)
-      num_vals *= shape[i];
-    data_holder = std::shared_ptr<std::vector<char>>(
-        new std::vector<char>(num_vals * word_size));
+    for (unsigned long i : shape)
+      num_vals *= i;
+    data_holder = std::make_shared<std::vector<char>>(num_vals * word_size);
   }
 
-  npy_array() : shape(0), word_size(0), fortran_order(0), num_vals(0) {}
+  npy_array() : shape(0), word_size(0), fortran_order(false), num_vals(0) {}
 
   template <typename T> T *data() {
     return reinterpret_cast<T *>(&(*data_holder)[0]);
@@ -91,7 +90,7 @@ std::vector<char> &operator+=(std::vector<char> &lhs, const char *rhs);
 template <typename T>
 void npy_save(std::string fname, const T *data, const std::vector<size_t> shape,
               std::string mode = "w") {
-  FILE *fp = NULL;
+  FILE *fp = nullptr;
   std::vector<size_t>
       true_data_shape; // if appending, the shape of existing + new data
 
@@ -150,7 +149,7 @@ void npz_save(std::string zipname, std::string fname, const T *data,
   fname += ".npy";
 
   // now, on with the show
-  FILE *fp = NULL;
+  FILE *fp = nullptr;
   uint16_t nrecs = 0;
   size_t global_header_offset = 0;
   std::vector<char> global_header;
