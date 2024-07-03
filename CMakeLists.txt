@@ -33,7 +33,7 @@ if (ENABLE_STATIC)
     install(TARGETS "cnpy-static" ARCHIVE DESTINATION lib)
 endif (ENABLE_STATIC)
 
-install(FILES "include/cnpy.h" DESTINATION include)
+install(FILES "include/cnpy.hpp" DESTINATION include)
 install(FILES "mat2npz" "npy2mat" "npz2mat" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 add_executable(test test/test.cpp)

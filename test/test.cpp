@@ -1,4 +1,4 @@
-#include "../include/cnpy.h"
+#include "../include/cnpy.hpp"
 #include <complex>
 #include <cstdlib>
 #include <gtest/gtest.h>
