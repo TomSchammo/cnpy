@@ -1,10 +1,10 @@
-#include"../include/cnpy.h"
-#include<complex>
-#include<cstdlib>
-#include<iostream>
-#include<map>
-#include<string>
+#include "../include/cnpy.h"
+#include <complex>
+#include <cstdlib>
 #include <gtest/gtest.h>
+#include <iostream>
+#include <map>
+#include <string>
 
 const int Nx = 128;
 const int Ny = 64;
@@ -18,13 +18,12 @@ auto get_data() {
   for (int i = 0; i < Nx * Ny * Nz; i++)
     data[i] = std::complex<double>(rand(), rand());
 
-   return data;
+  return data;
 }
-
 
 TEST(NpySaveLoad, Npy) {
 
-const auto data = get_data();
+  const auto data = get_data();
 
   // save it to file
   cnpy::npy_save("arr1.npy", &data[0], {Nz, Ny, Nx}, "w");
@@ -35,15 +34,15 @@ const auto data = get_data();
 
   // make sure the loaded data matches the saved data
   ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
-  ASSERT_TRUE(arr.shape.size() == 3 && arr.shape[0] == Nz && arr.shape[1] == Ny &&
-         arr.shape[2] == Nx);
+  ASSERT_TRUE(arr.shape.size() == 3 && arr.shape[0] == Nz &&
+              arr.shape[1] == Ny && arr.shape[2] == Nx);
   for (int i = 0; i < Nx * Ny * Nz; i++)
     ASSERT_EQ(data[i], loaded_data[i]);
 }
 
 TEST(NpyAppend, Npy) {
 
-const auto data = get_data();
+  const auto data = get_data();
 
   // save it to file
   cnpy::npy_save("arr1.npy", &data[0], {Nz, Ny, Nx}, "w");
@@ -55,7 +54,7 @@ const auto data = get_data();
 
 TEST(NpzSaveLoad, Npz) {
 
-const auto data = get_data();
+  const auto data = get_data();
   // now write to an npz file
   // non-array variables are treated as 1D arrays with 1 element
   double myVar1 = 1.2;
@@ -78,9 +77,7 @@ const auto data = get_data();
   double *mv1 = arr_mv1.data<double>();
   ASSERT_TRUE(arr_mv1.shape.size() == 1 && arr_mv1.shape[0] == 1);
   ASSERT_EQ(mv1[0], myVar1);
-
 }
-
 
 int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);

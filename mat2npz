@@ -14,5 +14,5 @@ for f in files:
     mat_vars.pop('__header__')
     mat_vars.pop('__globals__')
 
-    fn = f.replace('.mat','.npz')
-    savez(fn,**mat_vars)
+    fn = f.replace('.mat', '.npz')
+    savez(fn, **mat_vars)

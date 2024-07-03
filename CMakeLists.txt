@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0 FATAL_ERROR)
-if(COMMAND cmake_policy)
-	cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
+if (COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+endif (COMMAND cmake_policy)
 
 project(CNPY)
 
@@ -27,11 +27,11 @@ add_library(cnpy SHARED "src/cnpy.cpp")
 target_link_libraries(cnpy ${ZLIB_LIBRARIES})
 install(TARGETS "cnpy" LIBRARY DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-if(ENABLE_STATIC)
+if (ENABLE_STATIC)
     add_library(cnpy-static STATIC "src/cnpy.cpp")
     set_target_properties(cnpy-static PROPERTIES OUTPUT_NAME "cnpy")
     install(TARGETS "cnpy-static" ARCHIVE DESTINATION lib)
-endif(ENABLE_STATIC)
+endif (ENABLE_STATIC)
 
 install(FILES "include/cnpy.h" DESTINATION include)
 install(FILES "mat2npz" "npy2mat" "npz2mat" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
