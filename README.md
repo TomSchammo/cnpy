@@ -42,7 +42,7 @@ There are two functions for writing data: `npy_save` and `npz_save`.
 There are 3 functions for reading:
 
 - `npy_load` will load a .npy file.
-- `npz_load(fname)` will load a .npz and return a dictionary of NpyArray structues.
+- `npz_load(fname)` will load a .npz and return a dictionary of NpyArray structures.
 - `npz_load(fname,varname)` will load and return the NpyArray for data varname from the specified .npz file.
 
 The data structure for loaded data is below.
