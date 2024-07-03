@@ -6,7 +6,7 @@ endif (COMMAND cmake_policy)
 project(CNPY)
 
 if (NOT DEFINED CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 20)
 endif ()
 
 include(FetchContent)
