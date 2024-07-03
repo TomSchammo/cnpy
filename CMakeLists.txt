@@ -36,8 +36,8 @@ endif (ENABLE_STATIC)
 install(FILES "include/cnpy.h" DESTINATION include)
 install(FILES "mat2npz" "npy2mat" "npz2mat" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-add_executable(example1 test/example1.cpp)
-target_link_libraries(example1 cnpy GTest::gtest_main)
+add_executable(test test/test.cpp)
+target_link_libraries(test cnpy GTest::gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(example1)
+gtest_discover_tests(test)
