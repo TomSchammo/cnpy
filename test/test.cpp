@@ -10,6 +10,9 @@ const int Nx = 128;
 const int Ny = 64;
 const int Nz = 32;
 
+constexpr auto npy_file = "../test/data/test_load.npy";
+constexpr auto npz_file = "../test/data/test_load.npz";
+
 auto get_data() {
   // set random seed so that result is reproducible (for testing)
   srand(0);
@@ -21,7 +24,18 @@ auto get_data() {
   return data;
 }
 
-TEST(NpySaveLoad, Npy) {
+TEST(NpyLoad, Npy) {
+
+  const cnpy::NpyArray arr = cnpy::npy_load(npy_file);
+
+  const auto *const loaded_data = arr.data<double>();
+
+  EXPECT_EQ(loaded_data[0], 1.0f);
+  EXPECT_EQ(loaded_data[1], 2.0f);
+  EXPECT_EQ(loaded_data[2], 3.0f);
+}
+
+TEST(NpySave, Npy) {
 
   const auto data = get_data();
 
@@ -44,15 +58,76 @@ TEST(NpyAppend, Npy) {
 
   const auto data = get_data();
 
-  // save it to file
   cnpy::npy_save("arr1.npy", &data[0], {Nz, Ny, Nx}, "w");
-
-  // append the same data to file
-  // npy array on file now has shape (Nz+Nz,Ny,Nx)
   cnpy::npy_save("arr1.npy", &data[0], {Nz, Ny, Nx}, "a");
+
+  auto expected = data;
+  expected.insert(expected.end(), data.begin(), data.end());
+
+
+  cnpy::NpyArray arr = cnpy::npy_load("arr1.npy");
+  std::complex<double> *loaded_data = arr.data<std::complex<double>>();
+
+  ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
+  ASSERT_TRUE(arr.shape.size() == 3 && arr.shape[0] == Nz + Nz &&
+              arr.shape[1] == Ny && arr.shape[2] == Nx);
+  for (int i = 0; i < Nx * Ny * (Nz + Nz); i++)
+    ASSERT_EQ(expected[i], loaded_data[i]);
 }
 
-TEST(NpzSaveLoad, Npz) {
+TEST(NpzLoadAll, Npz) {
+
+  cnpy::npz_t npz = cnpy::npz_load(npz_file);
+
+  {
+    const auto f = npz["f"].as_vec<double>();
+    EXPECT_EQ(f.size(), 3);
+    EXPECT_EQ(f[0], .1);
+    EXPECT_EQ(f[1], .2);
+    EXPECT_EQ(f[2], .3);
+  }
+
+  {
+    const auto s = npz["s"].as_vec<long long>();
+    EXPECT_EQ(s.size(), 3);
+    EXPECT_EQ(s[0], 1);
+    EXPECT_EQ(s[1], 2);
+    EXPECT_EQ(s[2], 3);
+  }
+
+  {
+    const auto t = npz["t"].as_vec<char>();
+    EXPECT_EQ(t.size(), 1);
+    EXPECT_EQ(t[0], 'a');
+  }
+}
+
+TEST(NpzLoadSingleFirst, Npz) {
+  const auto f = cnpy::npz_load(npz_file, "f").as_vec<double>();
+  EXPECT_EQ(f.size(), 3);
+  EXPECT_EQ(f[0], .1);
+  EXPECT_EQ(f[1], .2);
+  EXPECT_EQ(f[2], .3);
+
+}
+
+// TODO: It looks like it's only possible to load the first one by name(?)
+TEST(NpzLoadSingleSecond, Npz) {
+  const auto s = cnpy::npz_load(npz_file, "s").as_vec<long long>();
+  EXPECT_EQ(s.size(), 3);
+  EXPECT_EQ(s[0], 1);
+  EXPECT_EQ(s[1], 2);
+  EXPECT_EQ(s[2], 3);
+}
+
+// TODO: It looks like it's only possible to load the first one by name(?)
+TEST(NpzLoadSingleThird, Npz) {
+    const auto t = cnpy::npz_load(npz_file, "t").as_vec<char>();
+    EXPECT_EQ(t.size(), 1);
+    EXPECT_EQ(t[0], 'a');
+}
+
+TEST(NpzSave, Npz) {
 
   const auto data = get_data();
   // now write to an npz file
