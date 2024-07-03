@@ -93,8 +93,8 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   fortran_order = header.substr(loc1, 4) == "True";
 
   // shape
-  loc1 = header.find("(");
-  size_t loc2 = header.find(")");
+  loc1 = header.find('(');
+  size_t loc2 = header.find(')');
 
   std::regex num_regex("[0-9][0-9]*");
   std::smatch sm;
@@ -117,7 +117,7 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   // assert(type == map_type(T));
 
   std::string str_ws = header.substr(loc1 + 2);
-  loc2 = str_ws.find("'");
+  loc2 = str_ws.find('\'');
   word_size = atoi(str_ws.substr(0, loc2).c_str());
 }
 
@@ -139,8 +139,8 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
   fortran_order = header.substr(loc1, 4) == "True";
 
   // shape
-  loc1 = header.find("(");
-  size_t loc2 = header.find(")");
+  loc1 = header.find('(');
+  size_t loc2 = header.find(')');
   if (loc1 == std::string::npos || loc2 == std::string::npos)
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: '(' or ')'");
@@ -170,7 +170,7 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
   // assert(type == map_type(T));
 
   std::string str_ws = header.substr(loc1 + 2);
-  loc2 = str_ws.find("'");
+  loc2 = str_ws.find('\'');
   word_size = atoi(str_ws.substr(0, loc2).c_str());
 }
 
