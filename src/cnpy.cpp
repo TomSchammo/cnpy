@@ -6,16 +6,16 @@
 #include "../include/cnpy.hpp"
 #include <algorithm>
 #include <complex>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <regex>
 #include <stdexcept>
-#include <cstdint>
 
 char cnpy::big_endian_test() {
   int x = 1;
-  return (((char *)&x)[0]) ? '<' : '>';
+  return ((char *)&x)[0] ? '<' : '>';
 }
 
 char cnpy::map_type(const std::type_info &t) {
@@ -88,15 +88,13 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   uint16_t header_len = *reinterpret_cast<uint16_t *>(buffer + 8);
   std::string header(reinterpret_cast<char *>(buffer + 9), header_len);
 
-  size_t loc1, loc2;
-
   // fortran order
-  loc1 = header.find("fortran_order") + 16;
-  fortran_order = (header.substr(loc1, 4) == "True" ? true : false);
+  size_t loc1 = header.find("fortran_order") + 16;
+  fortran_order = header.substr(loc1, 4) == "True";
 
   // shape
   loc1 = header.find("(");
-  loc2 = header.find(")");
+  size_t loc2 = header.find(")");
 
   std::regex num_regex("[0-9][0-9]*");
   std::smatch sm;
@@ -112,8 +110,7 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   // byte order code | stands for not applicable.
   // not sure when this applies except for byte array
   loc1 = header.find("descr") + 9;
-  bool little_endian =
-      (header[loc1] == '<' || header[loc1] == '|' ? true : false);
+  bool little_endian = header[loc1] == '<' || header[loc1] == '|';
   assert(little_endian);
 
   // char type = header[loc1+1];
@@ -133,19 +130,17 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
   std::string header = fgets(buffer, 256, fp);
   assert(header[header.size() - 1] == '\n');
 
-  size_t loc1, loc2;
-
   // fortran order
-  loc1 = header.find("fortran_order");
+  size_t loc1 = header.find("fortran_order");
   if (loc1 == std::string::npos)
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: 'fortran_order'");
   loc1 += 16;
-  fortran_order = (header.substr(loc1, 4) == "True" ? true : false);
+  fortran_order = header.substr(loc1, 4) == "True";
 
   // shape
   loc1 = header.find("(");
-  loc2 = header.find(")");
+  size_t loc2 = header.find(")");
   if (loc1 == std::string::npos || loc2 == std::string::npos)
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: '(' or ')'");
@@ -168,8 +163,7 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: 'descr'");
   loc1 += 9;
-  bool little_endian =
-      (header[loc1] == '<' || header[loc1] == '|' ? true : false);
+  bool little_endian = header[loc1] == '<' || header[loc1] == '|';
   assert(little_endian);
 
   // char type = header[loc1+1];
@@ -189,14 +183,13 @@ void cnpy::parse_zip_footer(FILE *fp, uint16_t &nrecs,
   if (res != 22)
     throw std::runtime_error("parse_zip_footer: failed fread");
 
-  uint16_t disk_no, disk_start, nrecs_on_disk, comment_len;
-  disk_no = *(uint16_t *)&footer[4];
-  disk_start = *(uint16_t *)&footer[6];
-  nrecs_on_disk = *(uint16_t *)&footer[8];
+  uint16_t disk_no = *(uint16_t *)&footer[4];
+  uint16_t disk_start = *(uint16_t *)&footer[6];
+  uint16_t nrecs_on_disk = *(uint16_t *)&footer[8];
   nrecs = *(uint16_t *)&footer[10];
   global_header_size = *(uint32_t *)&footer[12];
   global_header_offset = *(uint32_t *)&footer[16];
-  comment_len = *(uint16_t *)&footer[20];
+  uint16_t comment_len = *(uint16_t *)&footer[20];
 
   assert(disk_no == 0);
   assert(disk_start == 0);
@@ -226,7 +219,6 @@ cnpy::npy_array load_the_npz_array(FILE *fp, uint32_t compr_bytes,
   if (nread != compr_bytes)
     throw std::runtime_error("load_the_npy_file: failed fread");
 
-  int err;
   z_stream d_stream;
 
   d_stream.zalloc = nullptr;
@@ -234,7 +226,7 @@ cnpy::npy_array load_the_npz_array(FILE *fp, uint32_t compr_bytes,
   d_stream.opaque = nullptr;
   d_stream.avail_in = 0;
   d_stream.next_in = nullptr;
-  err = inflateInit2(&d_stream, -MAX_WBITS);
+  int err = inflateInit2(&d_stream, -MAX_WBITS);
 
   d_stream.avail_in = compr_bytes;
   d_stream.next_in = &buffer_compr[0];
@@ -347,10 +339,9 @@ cnpy::npy_array cnpy::npz_load(std::string fname, std::string varname) {
         *reinterpret_cast<uint32_t *>(&local_header[0] + 22);
 
     if (vname == varname) {
-      npy_array array =
-          (compr_method == 0)
-              ? load_the_npy_file(fp)
-              : load_the_npz_array(fp, compr_bytes, uncompr_bytes);
+      npy_array array = compr_method == 0 ? load_the_npy_file(fp)
+                                          : load_the_npz_array(fp, compr_bytes,
+                                                               uncompr_bytes);
       fclose(fp);
       return array;
     } else {
