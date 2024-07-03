@@ -1,8 +1,6 @@
 #include "../include/cnpy.hpp"
 #include <complex>
-#include <cstdlib>
 #include <gtest/gtest.h>
-#include <iostream>
 #include <map>
 #include <random>
 #include <string>
