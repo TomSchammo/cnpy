@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <stdint.h>
 
-char cnpy::BigEndianTest() {
+char cnpy::big_endian_test() {
   int x = 1;
   return (((char *)&x)[0]) ? '<' : '>';
 }
@@ -112,9 +112,9 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   // byte order code | stands for not applicable.
   // not sure when this applies except for byte array
   loc1 = header.find("descr") + 9;
-  bool littleEndian =
+  bool little_endian =
       (header[loc1] == '<' || header[loc1] == '|' ? true : false);
-  assert(littleEndian);
+  assert(little_endian);
 
   // char type = header[loc1+1];
   // assert(type == map_type(T));
@@ -168,9 +168,9 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: 'descr'");
   loc1 += 9;
-  bool littleEndian =
+  bool little_endian =
       (header[loc1] == '<' || header[loc1] == '|' ? true : false);
-  assert(littleEndian);
+  assert(little_endian);
 
   // char type = header[loc1+1];
   // assert(type == map_type(T));
@@ -204,21 +204,21 @@ void cnpy::parse_zip_footer(FILE *fp, uint16_t &nrecs,
   assert(comment_len == 0);
 }
 
-cnpy::NpyArray load_the_npy_file(FILE *fp) {
+cnpy::npy_array load_the_npy_file(FILE *fp) {
   std::vector<size_t> shape;
   size_t word_size;
   bool fortran_order;
   cnpy::parse_npy_header(fp, word_size, shape, fortran_order);
 
-  cnpy::NpyArray arr(shape, word_size, fortran_order);
+  cnpy::npy_array arr(shape, word_size, fortran_order);
   size_t nread = fread(arr.data<char>(), 1, arr.num_bytes(), fp);
   if (nread != arr.num_bytes())
     throw std::runtime_error("load_the_npy_file: failed fread");
   return arr;
 }
 
-cnpy::NpyArray load_the_npz_array(FILE *fp, uint32_t compr_bytes,
-                                  uint32_t uncompr_bytes) {
+cnpy::npy_array load_the_npz_array(FILE *fp, uint32_t compr_bytes,
+                                   uint32_t uncompr_bytes) {
 
   std::vector<unsigned char> buffer_compr(compr_bytes);
   std::vector<unsigned char> buffer_uncompr(uncompr_bytes);
@@ -249,7 +249,7 @@ cnpy::NpyArray load_the_npz_array(FILE *fp, uint32_t compr_bytes,
   bool fortran_order;
   cnpy::parse_npy_header(&buffer_uncompr[0], word_size, shape, fortran_order);
 
-  cnpy::NpyArray array(shape, word_size, fortran_order);
+  cnpy::npy_array array(shape, word_size, fortran_order);
 
   size_t offset = uncompr_bytes - array.num_bytes();
   memcpy(array.data<unsigned char>(), &buffer_uncompr[0] + offset,
@@ -313,7 +313,7 @@ cnpy::npz_t cnpy::npz_load(std::string fname) {
   return arrays;
 }
 
-cnpy::NpyArray cnpy::npz_load(std::string fname, std::string varname) {
+cnpy::npy_array cnpy::npz_load(std::string fname, std::string varname) {
   FILE *fp = fopen(fname.c_str(), "rb");
 
   if (!fp)
@@ -347,9 +347,10 @@ cnpy::NpyArray cnpy::npz_load(std::string fname, std::string varname) {
         *reinterpret_cast<uint32_t *>(&local_header[0] + 22);
 
     if (vname == varname) {
-      NpyArray array = (compr_method == 0)
-                           ? load_the_npy_file(fp)
-                           : load_the_npz_array(fp, compr_bytes, uncompr_bytes);
+      npy_array array =
+          (compr_method == 0)
+              ? load_the_npy_file(fp)
+              : load_the_npz_array(fp, compr_bytes, uncompr_bytes);
       fclose(fp);
       return array;
     } else {
@@ -366,14 +367,14 @@ cnpy::NpyArray cnpy::npz_load(std::string fname, std::string varname) {
                            " not found in " + fname);
 }
 
-cnpy::NpyArray cnpy::npy_load(std::string fname) {
+cnpy::npy_array cnpy::npy_load(std::string fname) {
 
   FILE *fp = fopen(fname.c_str(), "rb");
 
   if (!fp)
     throw std::runtime_error("npy_load: Unable to open file " + fname);
 
-  NpyArray arr = load_the_npy_file(fp);
+  npy_array arr = load_the_npy_file(fp);
 
   fclose(fp);
   return arr;

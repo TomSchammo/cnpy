@@ -22,9 +22,9 @@
 
 namespace cnpy {
 
-struct NpyArray {
-  NpyArray(const std::vector<size_t> &_shape, size_t _word_size,
-           bool _fortran_order)
+struct npy_array {
+  npy_array(const std::vector<size_t> &_shape, size_t _word_size,
+            bool _fortran_order)
       : shape(_shape), word_size(_word_size), fortran_order(_fortran_order) {
     num_vals = 1;
     for (size_t i = 0; i < shape.size(); i++)
@@ -33,7 +33,7 @@ struct NpyArray {
         new std::vector<char>(num_vals * word_size));
   }
 
-  NpyArray() : shape(0), word_size(0), fortran_order(0), num_vals(0) {}
+  npy_array() : shape(0), word_size(0), fortran_order(0), num_vals(0) {}
 
   template <typename T> T *data() {
     return reinterpret_cast<T *>(&(*data_holder)[0]);
@@ -57,9 +57,9 @@ struct NpyArray {
   size_t num_vals;
 };
 
-using npz_t = std::map<std::string, NpyArray>;
+using npz_t = std::map<std::string, npy_array>;
 
-char BigEndianTest();
+char big_endian_test();
 char map_type(const std::type_info &t);
 template <typename T>
 std::vector<char> create_npy_header(const std::vector<size_t> &shape);
@@ -70,8 +70,8 @@ void parse_npy_header(unsigned char *buffer, size_t &word_size,
 void parse_zip_footer(FILE *fp, uint16_t &nrecs, size_t &global_header_size,
                       size_t &global_header_offset);
 npz_t npz_load(std::string fname);
-NpyArray npz_load(std::string fname, std::string varname);
-NpyArray npy_load(std::string fname);
+npy_array npz_load(std::string fname, std::string varname);
+npy_array npy_load(std::string fname);
 
 template <typename T>
 std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
@@ -232,7 +232,7 @@ void npz_save(std::string zipname, std::string fname, const T *data,
                        local_header.size()); // offset of start of global
                                              // headers, since global header now
                                              // starts after newly written array
-  footer += (uint16_t)0; // zip file comment length
+  footer += (uint16_t)0;                     // zip file comment length
 
   // write everything
   fwrite(&local_header[0], sizeof(char), local_header.size(), fp);
@@ -264,7 +264,7 @@ std::vector<char> create_npy_header(const std::vector<size_t> &shape) {
 
   std::vector<char> dict;
   dict += "{'descr': '";
-  dict += BigEndianTest();
+  dict += big_endian_test();
   dict += map_type(typeid(T));
   dict += std::to_string(sizeof(T));
   dict += "', 'fortran_order': False, 'shape': (";
