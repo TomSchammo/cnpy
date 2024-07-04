@@ -15,7 +15,7 @@
 
 char cnpy::big_endian_test() {
   int x = 1;
-  return ((char *)&x)[0] ? '<' : '>';
+  return reinterpret_cast<char *>(&x)[0] ? '<' : '>';
 }
 
 char cnpy::map_type(const std::type_info &t) {
@@ -181,13 +181,13 @@ void cnpy::parse_zip_footer(FILE *fp, uint16_t &nrecs,
   if (size_t res = fread(&footer[0], sizeof(char), 22, fp); res != 22)
     throw std::runtime_error("parse_zip_footer: failed fread");
 
-  uint16_t disk_no = *(uint16_t *)&footer[4];
-  uint16_t disk_start = *(uint16_t *)&footer[6];
-  uint16_t nrecs_on_disk = *(uint16_t *)&footer[8];
-  nrecs = *(uint16_t *)&footer[10];
-  global_header_size = *(uint32_t *)&footer[12];
-  global_header_offset = *(uint32_t *)&footer[16];
-  uint16_t comment_len = *(uint16_t *)&footer[20];
+  uint16_t disk_no = *reinterpret_cast<uint16_t *>(&footer[4]);
+  uint16_t disk_start = *reinterpret_cast<uint16_t *>(&footer[6]);
+  uint16_t nrecs_on_disk = *reinterpret_cast<uint16_t *>(&footer[8]);
+  nrecs = *reinterpret_cast<uint16_t *>(&footer[10]);
+  global_header_size = *reinterpret_cast<uint32_t *>(&footer[12]);
+  global_header_offset = *reinterpret_cast<uint32_t *>(&footer[16]);
+  uint16_t comment_len = *reinterpret_cast<uint16_t *>(&footer[20]);
 
   assert(disk_no == 0);
   assert(disk_start == 0);
@@ -269,7 +269,7 @@ cnpy::npz_t cnpy::npz_load(std::string fname) {
       break;
 
     // read in the variable name
-    uint16_t name_len = *(uint16_t *)&local_header[26];
+    uint16_t name_len = *reinterpret_cast<uint16_t *>(&local_header[26]);
     std::string varname(name_len, ' ');
     if (size_t vname_res = fread(&varname[0], sizeof(char), name_len, fp);
         vname_res != name_len)
@@ -279,7 +279,7 @@ cnpy::npz_t cnpy::npz_load(std::string fname) {
     varname.erase(varname.end() - 4, varname.end());
 
     // read in the extra field
-    if (uint16_t extra_field_len = *(uint16_t *)&local_header[28];
+    if (uint16_t extra_field_len = *reinterpret_cast<uint16_t *>(&local_header[28]);
         extra_field_len > 0) {
       std::vector<char> buff(extra_field_len);
       if (size_t efield_res =
@@ -321,7 +321,7 @@ cnpy::npy_array cnpy::npz_load(std::string fname, std::string varname) {
       break;
 
     // read in the variable name
-    uint16_t name_len = *(uint16_t *)&local_header[26];
+    uint16_t name_len = *reinterpret_cast<uint16_t *>(&local_header[26]);
     std::string vname(name_len, ' ');
     if (size_t vname_res = fread(&vname[0], sizeof(char), name_len, fp);
         vname_res != name_len)
@@ -329,7 +329,7 @@ cnpy::npy_array cnpy::npz_load(std::string fname, std::string varname) {
     vname.erase(vname.end() - 4, vname.end()); // erase the lagging .npy
 
     // read in the extra field
-    uint16_t extra_field_len = *(uint16_t *)&local_header[28];
+    uint16_t extra_field_len = *reinterpret_cast<uint16_t *>(&local_header[28]);
     fseek(fp, extra_field_len, SEEK_CUR); // skip past the extra field
 
     uint16_t compr_method = *reinterpret_cast<uint16_t *>(&local_header[0] + 8);
@@ -345,7 +345,7 @@ cnpy::npy_array cnpy::npz_load(std::string fname, std::string varname) {
       return array;
     } else {
       // skip past the data
-      uint32_t size = *(uint32_t *)&local_header[22];
+      uint32_t size = *reinterpret_cast<uint32_t *>(&local_header[22]);
       fseek(fp, size, SEEK_CUR);
     }
   }
