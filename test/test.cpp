@@ -18,8 +18,9 @@ auto get_data() {
   std::uniform_real_distribution<double> distribution(0.0, 1.0);
 
   std::vector<std::complex<double>> data(nx * ny * nz);
-  for (int i = 0; i < nx * ny * nz; i++)
+  for (int i = 0; i < nx * ny * nz; i++) {
     data[i] = std::complex<double>(distribution(generator), distribution(generator));
+  }
 
   return data;
 }
@@ -50,8 +51,9 @@ TEST(NpySave, Npy) {
   ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
   ASSERT_TRUE(arr.shape.size() == 3 && arr.shape[0] == nz &&
               arr.shape[1] == ny && arr.shape[2] == nx);
-  for (int i = 0; i < nx * ny * nz; i++)
+  for (int i = 0; i < nx * ny * nz; i++) {
     ASSERT_EQ(data[i], loaded_data[i]);
+  }
 }
 
 TEST(NpyAppend, Npy) {
@@ -70,8 +72,9 @@ TEST(NpyAppend, Npy) {
   ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
   ASSERT_TRUE(arr.shape.size() == 3 && arr.shape[0] == nz + nz &&
               arr.shape[1] == ny && arr.shape[2] == nx);
-  for (int i = 0; i < nx * ny * (nz + nz); i++)
+  for (int i = 0; i < nx * ny * (nz + nz); i++) {
     ASSERT_EQ(expected[i], loaded_data[i]);
+  }
 }
 
 TEST(NpzLoadAll, Npz) {

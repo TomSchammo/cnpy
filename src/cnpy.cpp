@@ -20,47 +20,31 @@ char cnpy::big_endian_test() {
 }
 
 char cnpy::map_type(const std::type_info &t) {
-  if (t == typeid(float))
+  if (t == typeid(float) || t == typeid(double) || t == typeid(long double)) {
     return 'f';
-  if (t == typeid(double))
-    return 'f';
-  if (t == typeid(long double))
-    return 'f';
+  }
 
-  if (t == typeid(int))
+  if (t == typeid(int) || t == typeid(char) || t == typeid(short) ||
+      t == typeid(long) || t == typeid(long long)) {
     return 'i';
-  if (t == typeid(char))
-    return 'i';
-  if (t == typeid(short))
-    return 'i';
-  if (t == typeid(long))
-    return 'i';
-  if (t == typeid(long long))
-    return 'i';
+  }
 
-  if (t == typeid(unsigned char))
+  if (t == typeid(unsigned char) || t == typeid(unsigned short) ||
+      t == typeid(unsigned long) || t == typeid(unsigned long long) ||
+      t == typeid(unsigned int)) {
     return 'u';
-  if (t == typeid(unsigned short))
-    return 'u';
-  if (t == typeid(unsigned long))
-    return 'u';
-  if (t == typeid(unsigned long long))
-    return 'u';
-  if (t == typeid(unsigned int))
-    return 'u';
+  }
 
-  if (t == typeid(bool))
+  if (t == typeid(bool)) {
     return 'b';
+  }
 
-  if (t == typeid(std::complex<float>))
+  if (t == typeid(std::complex<float>) || t == typeid(std::complex<double>) ||
+      t == typeid(std::complex<long double>)) {
     return 'c';
-  if (t == typeid(std::complex<double>))
-    return 'c';
-  if (t == typeid(std::complex<long double>))
-    return 'c';
+  }
 
-  else
-    return '?';
+  return '?';
 }
 
 template <>
@@ -125,25 +109,29 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
 void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
                             std::vector<size_t> &shape, bool &fortran_order) {
   std::array<char, 256> buffer;
-  if (const size_t res = fread(buffer.data(), sizeof(char), 11, fp); res != 11)
+  if (const size_t res = fread(buffer.data(), sizeof(char), 11, fp);
+      res != 11) {
     throw std::runtime_error("parse_npy_header: failed fread");
+  }
   std::string header = fgets(buffer.data(), 256, fp);
   assert(header[header.size() - 1] == '\n');
 
   // fortran order
   size_t loc1 = header.find("fortran_order");
-  if (loc1 == std::string::npos)
+  if (loc1 == std::string::npos) {
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: 'fortran_order'");
+  }
   loc1 += 16;
   fortran_order = header.substr(loc1, 4) == "True";
 
   // shape
   loc1 = header.find('(');
   size_t loc2 = header.find(')');
-  if (loc1 == std::string::npos || loc2 == std::string::npos)
+  if (loc1 == std::string::npos || loc2 == std::string::npos) {
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: '(' or ')'");
+  }
 
   const std::regex num_regex("[0-9][0-9]*");
   std::smatch sm;
@@ -159,9 +147,10 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
   // byte order code | stands for not applicable.
   // not sure when this applies except for byte array
   loc1 = header.find("descr");
-  if (loc1 == std::string::npos)
+  if (loc1 == std::string::npos) {
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: 'descr'");
+  }
   loc1 += 9;
   const bool little_endian = header[loc1] == '<' || header[loc1] == '|';
   assert(little_endian);
@@ -179,8 +168,9 @@ void cnpy::parse_zip_footer(FILE *fp, uint16_t &nrecs,
                             size_t &global_header_offset) {
   std::vector<char> footer(22);
   fseek(fp, -22, SEEK_END);
-  if (const size_t res = fread(footer.data(), sizeof(char), 22, fp); res != 22)
+  if (const size_t res = fread(footer.data(), sizeof(char), 22, fp); res != 22) {
     throw std::runtime_error("parse_zip_footer: failed fread");
+  }
 
   const uint16_t disk_no = *reinterpret_cast<uint16_t *>(&footer[4]);
   const uint16_t disk_start = *reinterpret_cast<uint16_t *>(&footer[6]);
@@ -204,8 +194,9 @@ cnpy::npy_array load_the_npy_file(FILE *fp) {
 
   cnpy::npy_array arr(shape, word_size, fortran_order);
   if (const size_t nread = fread(arr.data<char>(), 1, arr.num_bytes(), fp);
-      nread != arr.num_bytes())
+      nread != arr.num_bytes()) {
     throw std::runtime_error("load_the_npy_file: failed fread");
+  }
   return arr;
 }
 
@@ -215,8 +206,9 @@ cnpy::npy_array load_the_npz_array(FILE *fp, const uint32_t compr_bytes,
   std::vector<unsigned char> buffer_compr(compr_bytes);
   std::vector<unsigned char> buffer_uncompr(uncompr_bytes);
   if (const size_t nread = fread(buffer_compr.data(), 1, compr_bytes, fp);
-      nread != compr_bytes)
+      nread != compr_bytes) {
     throw std::runtime_error("load_the_npy_file: failed fread");
+  }
 
   z_stream d_stream;
 
@@ -238,7 +230,8 @@ cnpy::npy_array load_the_npz_array(FILE *fp, const uint32_t compr_bytes,
   std::vector<size_t> shape;
   size_t word_size;
   bool fortran_order;
-  cnpy::parse_npy_header(buffer_uncompr.data(), word_size, shape, fortran_order);
+  cnpy::parse_npy_header(buffer_uncompr.data(), word_size, shape,
+                         fortran_order);
 
   cnpy::npy_array array(shape, word_size, fortran_order);
 
@@ -261,20 +254,25 @@ cnpy::npz_t cnpy::npz_load(std::string fname) {
 
   while (true) {
     std::vector<char> local_header(30);
-    if (const size_t headerres = fread(local_header.data(), sizeof(char), 30, fp);
-        headerres != 30)
+    if (const size_t headerres =
+            fread(local_header.data(), sizeof(char), 30, fp);
+        headerres != 30) {
       throw std::runtime_error("npz_load: failed fread");
+    }
 
     // if we've reached the global header, stop reading
-    if (local_header[2] != 0x03 || local_header[3] != 0x04)
+    if (local_header[2] != 0x03 || local_header[3] != 0x04) {
       break;
+    }
 
     // read in the variable name
     const uint16_t name_len = *reinterpret_cast<uint16_t *>(&local_header[26]);
     std::string varname(name_len, ' ');
-    if (const size_t vname_res = fread(varname.data(), sizeof(char), name_len, fp);
-        vname_res != name_len)
+    if (const size_t vname_res =
+            fread(varname.data(), sizeof(char), name_len, fp);
+        vname_res != name_len) {
       throw std::runtime_error("npz_load: failed fread");
+    }
 
     // erase the lagging .npy
     varname.erase(varname.end() - 4, varname.end());
@@ -286,8 +284,9 @@ cnpy::npz_t cnpy::npz_load(std::string fname) {
       std::vector<char> buff(extra_field_len);
       if (const size_t efield_res =
               fread(buff.data(), sizeof(char), extra_field_len, fp);
-          efield_res != extra_field_len)
+          efield_res != extra_field_len) {
         throw std::runtime_error("npz_load: failed fread");
+      }
     }
 
     const uint16_t compr_method =
@@ -311,29 +310,36 @@ cnpy::npz_t cnpy::npz_load(std::string fname) {
 cnpy::npy_array cnpy::npz_load(std::string fname, std::string varname) {
   FILE *fp = fopen(fname.c_str(), "rb");
 
-  if (!fp)
+  if (!fp) {
     throw std::runtime_error("npz_load: Unable to open file " + fname);
+  }
 
   while (true) {
     std::vector<char> local_header(30);
-    if (const size_t header_res = fread(local_header.data(), sizeof(char), 30, fp);
-        header_res != 30)
+    if (const size_t header_res =
+            fread(local_header.data(), sizeof(char), 30, fp);
+        header_res != 30) {
       throw std::runtime_error("npz_load: failed fread");
+    }
 
     // if we've reached the global header, stop reading
-    if (local_header[2] != 0x03 || local_header[3] != 0x04)
+    if (local_header[2] != 0x03 || local_header[3] != 0x04) {
       break;
+    }
 
     // read in the variable name
     const uint16_t name_len = *reinterpret_cast<uint16_t *>(&local_header[26]);
     std::string vname(name_len, ' ');
-    if (const size_t vname_res = fread(vname.data(), sizeof(char), name_len, fp);
-        vname_res != name_len)
+    if (const size_t vname_res =
+            fread(vname.data(), sizeof(char), name_len, fp);
+        vname_res != name_len) {
       throw std::runtime_error("npz_load: failed fread");
+    }
     vname.erase(vname.end() - 4, vname.end()); // erase the lagging .npy
 
     // read in the extra field
-    const uint16_t extra_field_len = *reinterpret_cast<uint16_t *>(&local_header[28]);
+    const uint16_t extra_field_len =
+        *reinterpret_cast<uint16_t *>(&local_header[28]);
     fseek(fp, extra_field_len, SEEK_CUR); // skip past the extra field
 
     const uint16_t compr_method =
@@ -367,8 +373,9 @@ cnpy::npy_array cnpy::npy_load(std::string fname) {
 
   FILE *fp = fopen(fname.c_str(), "rb");
 
-  if (!fp)
+  if (!fp) {
     throw std::runtime_error("npy_load: Unable to open file " + fname);
+  }
 
   npy_array arr = load_the_npy_file(fp);
 

@@ -27,8 +27,9 @@ struct npy_array {
             bool _fortran_order)
       : shape(_shape), word_size(_word_size), fortran_order(_fortran_order) {
     num_vals = 1;
-    for (const unsigned long i : shape)
+    for (const unsigned long i : shape) {
       num_vals *= i;
+    }
     data_holder = std::make_shared<std::vector<char>>(num_vals * word_size);
   }
 
@@ -94,8 +95,9 @@ void npy_save(std::string fname, const T *data, const std::vector<size_t> shape,
   std::vector<size_t>
       true_data_shape; // if appending, the shape of existing + new data
 
-  if (mode == "a")
+  if (mode == "a") {
     fp = fopen(fname.c_str(), "r+b");
+  }
 
   if (fp) {
     // file exists. we need to append to it. read the header, modify the array
@@ -154,8 +156,9 @@ void npz_save(std::string zipname, std::string fname, const T *data,
   size_t global_header_offset = 0;
   std::vector<char> global_header;
 
-  if (mode == "a")
+  if (mode == "a") {
     fp = fopen(zipname.c_str(), "r+b");
+  }
 
   if (fp) {
     // zip file exists. we need to add a new npy file to it.
@@ -273,8 +276,9 @@ std::vector<char> create_npy_header(const std::vector<size_t> &shape) {
     dict += ", ";
     dict += std::to_string(shape[i]);
   }
-  if (shape.size() == 1)
+  if (shape.size() == 1) {
     dict += ",";
+  }
   dict += "), }";
   // pad with spaces so that preamble+dict is modulo 16 bytes. preamble is 10
   // bytes. dict needs to end with \n
