@@ -44,7 +44,7 @@ TEST(NpySave, Npy) {
 
   // load it into a new array
   cnpy::npy_array arr = cnpy::npy_load("arr1.npy");
-  auto *loaded_data = arr.data<std::complex<double>>();
+  const auto *loaded_data = arr.data<std::complex<double>>();
 
   // make sure the loaded data matches the saved data
   ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
@@ -65,7 +65,7 @@ TEST(NpyAppend, Npy) {
   expected.insert(expected.end(), data.begin(), data.end());
 
   cnpy::npy_array arr = cnpy::npy_load("arr1.npy");
-  auto *loaded_data = arr.data<std::complex<double>>();
+  const auto *loaded_data = arr.data<std::complex<double>>();
 
   ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
   ASSERT_TRUE(arr.shape.size() == 3 && arr.shape[0] == nz + nz &&
@@ -130,8 +130,8 @@ TEST(NpzSave, Npz) {
   const auto data = get_data();
   // now write to an npz file
   // non-array variables are treated as 1D arrays with 1 element
-  double my_var1 = 1.2;
-  char my_var2 = 'a';
+  const double my_var1 = 1.2;
+  const char my_var2 = 'a';
   cnpy::npz_save("out.npz", "my_var1", &my_var1, {1},
                  "w"); //"w" overwrites any existing file
   cnpy::npz_save("out.npz", "my_var2", &my_var2, {1},
@@ -147,7 +147,7 @@ TEST(NpzSave, Npz) {
 
   // check that the loaded myVar1 matches myVar1
   cnpy::npy_array arr_mv1 = my_npz["my_var1"];
-  auto *mv1 = arr_mv1.data<double>();
+  const auto *mv1 = arr_mv1.data<double>();
   ASSERT_TRUE(arr_mv1.shape.size() == 1 && arr_mv1.shape[0] == 1);
   ASSERT_EQ(mv1[0], my_var1);
 }

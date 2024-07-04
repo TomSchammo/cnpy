@@ -27,7 +27,7 @@ struct npy_array {
             bool _fortran_order)
       : shape(_shape), word_size(_word_size), fortran_order(_fortran_order) {
     num_vals = 1;
-    for (unsigned long i : shape)
+    for (const unsigned long i : shape)
       num_vals *= i;
     data_holder = std::make_shared<std::vector<char>>(num_vals * word_size);
   }
@@ -83,7 +83,7 @@ std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
 }
 
 template <>
-std::vector<char> &operator+=(std::vector<char> &lhs, const std::string rhs);
+std::vector<char> &operator+=(std::vector<char> &lhs, std::string rhs);
 template <>
 std::vector<char> &operator+=(std::vector<char> &lhs, const char *rhs);
 
@@ -132,7 +132,7 @@ void npy_save(std::string fname, const T *data, const std::vector<size_t> shape,
   }
 
   std::vector<char> header = create_npy_header<T>(true_data_shape);
-  size_t nels =
+  const size_t nels =
       std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
 
   fseek(fp, 0, SEEK_SET);
@@ -278,7 +278,7 @@ std::vector<char> create_npy_header(const std::vector<size_t> &shape) {
   dict += "), }";
   // pad with spaces so that preamble+dict is modulo 16 bytes. preamble is 10
   // bytes. dict needs to end with \n
-  int remainder = 16 - (10 + dict.size()) % 16;
+  const int remainder = 16 - (10 + dict.size()) % 16;
   dict.insert(dict.end(), remainder, ' ');
   dict.back() = '\n';
 
