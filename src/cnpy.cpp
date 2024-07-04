@@ -5,6 +5,7 @@
 
 #include "../include/cnpy.hpp"
 #include <algorithm>
+#include <array>
 #include <complex>
 #include <cstdint>
 #include <cstdlib>
@@ -123,10 +124,10 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
 
 void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
                             std::vector<size_t> &shape, bool &fortran_order) {
-  char buffer[256];
-  if (const size_t res = fread(buffer, sizeof(char), 11, fp); res != 11)
+  std::array<char, 256> buffer;
+  if (const size_t res = fread(buffer.data(), sizeof(char), 11, fp); res != 11)
     throw std::runtime_error("parse_npy_header: failed fread");
-  std::string header = fgets(buffer, 256, fp);
+  std::string header = fgets(buffer.data(), 256, fp);
   assert(header[header.size() - 1] == '\n');
 
   // fortran order
