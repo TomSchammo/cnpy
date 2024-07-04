@@ -25,8 +25,7 @@ namespace cnpy {
 struct npy_array {
   npy_array(const std::vector<size_t> &_shape, size_t _word_size,
             bool _fortran_order)
-      : shape(_shape), word_size(_word_size), fortran_order(_fortran_order) {
-    num_vals = 1;
+      : shape(_shape), word_size(_word_size), fortran_order(_fortran_order), num_vals(1) {
     for (const unsigned long i : shape) {
       num_vals *= i;
     }
