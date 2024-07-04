@@ -34,10 +34,12 @@ struct npy_array {
 
   npy_array() : shape_(0), word_size_(0), fortran_order_(false), num_vals_(0) {}
 
+  // TODO: can this be noexcept (because of reinterpret_cast)?
   template <typename T> T *data() {
     return reinterpret_cast<T *>(data_holder_->data());
   }
 
+  // TODO: can this be noexcept (because of reinterpret_cast)?
   template <typename T> const T *data() const {
     return reinterpret_cast<T *>(data_holder_->data());
   }
@@ -47,12 +49,12 @@ struct npy_array {
     return std::vector<T>(p, p + num_vals_);
   }
 
-  [[nodiscard]] size_t num_bytes() const { return data_holder_->size(); }
-  [[nodiscard]] size_t num_vals() const { return num_vals_; }
-  [[nodiscard]] size_t word_size() const { return word_size_; }
-  [[nodiscard]] bool fortran_order() const { return fortran_order_; }
-  [[nodiscard]] std::vector<size_t> shape() const { return shape_; }
-  [[nodiscard]] std::vector<size_t> shape() { return shape_; }
+  [[nodiscard]] size_t num_bytes() const noexcept { return data_holder_->size(); }
+  [[nodiscard]] size_t num_vals() const noexcept { return num_vals_; }
+  [[nodiscard]] size_t word_size() const noexcept { return word_size_; }
+  [[nodiscard]] bool fortran_order() const noexcept { return fortran_order_; }
+  [[nodiscard]] std::vector<size_t> shape() const noexcept { return shape_; }
+  [[nodiscard]] std::vector<size_t> shape() noexcept { return shape_; }
 
 private:
   std::shared_ptr<std::vector<char>> data_holder_;
