@@ -49,7 +49,7 @@ char cnpy::map_type(const std::type_info &t) {
 
 template <>
 std::vector<char> &cnpy::operator+=(std::vector<char> &lhs,
-                                    const std::string rhs) {
+                                    const std::string rhs) { // NOLINT
   lhs.insert(lhs.end(), rhs.begin(), rhs.end());
   return lhs;
 }
@@ -242,7 +242,7 @@ cnpy::npy_array load_the_npz_array(FILE *fp, const uint32_t compr_bytes,
   return array;
 }
 
-cnpy::npz_t cnpy::npz_load(std::string fname) {
+cnpy::npz_t cnpy::npz_load(const std::string &fname) {
   FILE *fp = fopen(fname.c_str(), "rb");
 
   if (!fp) {
@@ -307,7 +307,7 @@ cnpy::npz_t cnpy::npz_load(std::string fname) {
   return arrays;
 }
 
-cnpy::npy_array cnpy::npz_load(std::string fname, std::string varname) {
+cnpy::npy_array cnpy::npz_load(const std::string &fname, const std::string &varname) {
   FILE *fp = fopen(fname.c_str(), "rb");
 
   if (!fp) {
@@ -369,7 +369,7 @@ cnpy::npy_array cnpy::npz_load(std::string fname, std::string varname) {
                            " not found in " + fname);
 }
 
-cnpy::npy_array cnpy::npy_load(std::string fname) {
+cnpy::npy_array cnpy::npy_load(const std::string &fname) {
 
   FILE *fp = fopen(fname.c_str(), "rb");
 

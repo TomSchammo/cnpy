@@ -7,6 +7,7 @@
 #define LIBCNPY_HPP
 
 #include <cassert>
+#include <cstdint>
 #include <cstdio>
 #include <iostream>
 #include <map>
@@ -14,7 +15,6 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
-#include <cstdint>
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -69,9 +69,9 @@ void parse_npy_header(unsigned char *buffer, size_t &word_size,
                       std::vector<size_t> &shape, bool &fortran_order);
 void parse_zip_footer(FILE *fp, uint16_t &nrecs, size_t &global_header_size,
                       size_t &global_header_offset);
-npz_t npz_load(std::string fname);
-npy_array npz_load(std::string fname, std::string varname);
-npy_array npy_load(std::string fname);
+npz_t npz_load(const std::string &fname);
+npy_array npz_load(const std::string &fname, const std::string &varname);
+npy_array npy_load(const std::string &fname);
 
 template <typename T>
 std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
@@ -83,20 +83,22 @@ std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
   return lhs;
 }
 
+// TODO: rhs cannot be a const& for some reason???
 template <>
 std::vector<char> &operator+=(std::vector<char> &lhs, std::string rhs);
 template <>
 std::vector<char> &operator+=(std::vector<char> &lhs, const char *rhs);
 
 template <typename T>
-void npy_save(std::string fname, const T *data, const std::vector<size_t> shape,
-              std::string mode = "w") {
+void npy_save(const std::string_view fname, const T *data,
+              const std::vector<size_t> &shape,
+              const std::string_view mode = "w") {
   FILE *fp = nullptr;
   std::vector<size_t>
       true_data_shape; // if appending, the shape of existing + new data
 
   if (mode == "a") {
-    fp = fopen(fname.c_str(), "r+b");
+    fp = fopen(fname.data(), "r+b");
   }
 
   if (fp) {
@@ -129,7 +131,7 @@ void npy_save(std::string fname, const T *data, const std::vector<size_t> shape,
     }
     true_data_shape[0] += shape[0];
   } else {
-    fp = fopen(fname.c_str(), "wb");
+    fp = fopen(fname.data(), "wb");
     true_data_shape = shape;
   }
 
@@ -145,8 +147,9 @@ void npy_save(std::string fname, const T *data, const std::vector<size_t> shape,
 }
 
 template <typename T>
-void npz_save(std::string zipname, std::string fname, const T *data,
-              const std::vector<size_t> &shape, std::string mode = "w") {
+void npz_save(const std::string_view zipname, std::string fname, const T *data,
+              const std::vector<size_t> &shape,
+              const std::string_view mode = "w") {
   // first, append a .npy to the fname
   fname += ".npy";
 
@@ -157,7 +160,7 @@ void npz_save(std::string zipname, std::string fname, const T *data,
   std::vector<char> global_header;
 
   if (mode == "a") {
-    fp = fopen(zipname.c_str(), "r+b");
+    fp = fopen(zipname.data(), "r+b");
   }
 
   if (fp) {
@@ -177,7 +180,7 @@ void npz_save(std::string zipname, std::string fname, const T *data,
     }
     fseek(fp, global_header_offset, SEEK_SET);
   } else {
-    fp = fopen(zipname.c_str(), "wb");
+    fp = fopen(zipname.data(), "wb");
   }
 
   std::vector<char> npy_header = create_npy_header<T>(shape);
@@ -190,6 +193,7 @@ void npz_save(std::string zipname, std::string fname, const T *data,
   uint32_t crc = crc32(0L, reinterpret_cast<uint8_t *>(npy_header.data()), npy_header.size());
   crc = crc32(crc, reinterpret_cast<const uint8_t *>(data), nels * sizeof(T));
 
+  // clang-format off
   // build the local header
   std::vector<char> local_header;
   local_header += "PK";                   // first part of sig
@@ -236,6 +240,7 @@ void npz_save(std::string zipname, std::string fname, const T *data,
                                              // headers, since global header now
                                              // starts after newly written array
   footer += static_cast<uint16_t>(0);                     // zip file comment length
+  // clang-format on
 
   // write everything
   fwrite(local_header.data(), sizeof(char), local_header.size(), fp);
@@ -247,16 +252,16 @@ void npz_save(std::string zipname, std::string fname, const T *data,
 }
 
 template <typename T>
-void npy_save(std::string fname, const std::vector<T> data,
-              std::string mode = "w") {
+void npy_save(const std::string_view fname, const std::vector<T> data,
+              const std::string_view mode = "w") {
   std::vector<size_t> shape;
   shape.push_back(data.size());
   npy_save(fname, data.data(), shape, mode);
 }
 
 template <typename T>
-void npz_save(std::string zipname, std::string fname, const std::vector<T> data,
-              std::string mode = "w") {
+void npz_save(const std::string_view zipname, const std::string_view fname,
+              const std::vector<T> data, const std::string_view mode = "w") {
   std::vector<size_t> shape;
   shape.push_back(data.size());
   npz_save(zipname, fname, data.data(), shape, mode);
