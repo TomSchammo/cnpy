@@ -47,23 +47,6 @@ char cnpy::map_type(const std::type_info &t) {
   return '?';
 }
 
-template <>
-std::vector<char> &cnpy::operator+=(std::vector<char> &lhs,
-                                    const std::string rhs) { // NOLINT
-  lhs.insert(lhs.end(), rhs.begin(), rhs.end());
-  return lhs;
-}
-
-template <>
-std::vector<char> &cnpy::operator+=(std::vector<char> &lhs, const char *rhs) {
-  // write in little endian
-  const size_t len = strlen(rhs);
-  lhs.reserve(len);
-  for (size_t byte = 0; byte < len; byte++) {
-    lhs.push_back(rhs[byte]);
-  }
-  return lhs;
-}
 
 void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
                             std::vector<size_t> &shape, bool &fortran_order) {

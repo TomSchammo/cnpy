@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -23,7 +24,7 @@
 namespace cnpy {
 
 struct npy_array {
-  npy_array(const std::vector<size_t> &shape, const size_t word_size,
+  constexpr npy_array(const std::vector<size_t> &shape, const size_t word_size,
             const bool fortran_order)
       : shape_(shape), word_size_(word_size), fortran_order_(fortran_order), num_vals_(1) {
     for (const unsigned long i : shape_) {
@@ -32,15 +33,15 @@ struct npy_array {
     data_holder_ = std::make_shared<std::vector<char>>(num_vals_ * word_size_);
   }
 
-  npy_array() : shape_(0), word_size_(0), fortran_order_(false), num_vals_(0) {}
+  constexpr npy_array() : shape_(0), word_size_(0), fortran_order_(false), num_vals_(0) {}
 
   // TODO: can this be noexcept (because of reinterpret_cast)?
-  template <typename T> T *data() {
+  template <typename T> constexpr T *data() {
     return reinterpret_cast<T *>(data_holder_->data());
   }
 
   // TODO: can this be noexcept (because of reinterpret_cast)?
-  template <typename T> const T *data() const {
+  template <typename T> constexpr T *data() const {
     return reinterpret_cast<T *>(data_holder_->data());
   }
 
@@ -49,12 +50,12 @@ struct npy_array {
     return std::vector<T>(p, p + num_vals_);
   }
 
-  [[nodiscard]] size_t num_bytes() const noexcept { return data_holder_->size(); }
-  [[nodiscard]] size_t num_vals() const noexcept { return num_vals_; }
-  [[nodiscard]] size_t word_size() const noexcept { return word_size_; }
-  [[nodiscard]] bool fortran_order() const noexcept { return fortran_order_; }
-  [[nodiscard]] std::vector<size_t> shape() const noexcept { return shape_; }
-  [[nodiscard]] std::vector<size_t> shape() noexcept { return shape_; }
+  [[nodiscard]] constexpr size_t num_bytes() const noexcept { return data_holder_->size(); }
+  [[nodiscard]] constexpr size_t num_vals() const noexcept { return num_vals_; }
+  [[nodiscard]] constexpr size_t word_size() const noexcept { return word_size_; }
+  [[nodiscard]] constexpr bool fortran_order() const noexcept { return fortran_order_; }
+  [[nodiscard]] constexpr std::vector<size_t> shape() const noexcept { return shape_; }
+  [[nodiscard]] constexpr std::vector<size_t> shape() noexcept { return shape_; }
 
 private:
   std::shared_ptr<std::vector<char>> data_holder_;
@@ -81,7 +82,7 @@ npy_array npz_load(const std::string &fname, const std::string &varname);
 npy_array npy_load(const std::string &fname);
 
 template <typename T>
-std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
+constexpr std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
   // write in little endian
   for (size_t byte = 0; byte < sizeof(T); byte++) {
     char val = *(reinterpret_cast<const char *>(&rhs) + byte);
@@ -92,9 +93,22 @@ std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
 
 // TODO: rhs cannot be a const& for some reason???
 template <>
-std::vector<char> &operator+=(std::vector<char> &lhs, std::string rhs);
+constexpr std::vector<char> &cnpy::operator+=(std::vector<char> &lhs,
+                                    const std::string rhs) { // NOLINT
+  lhs.insert(lhs.end(), rhs.begin(), rhs.end());
+  return lhs;
+}
+
 template <>
-std::vector<char> &operator+=(std::vector<char> &lhs, const char *rhs);
+constexpr std::vector<char> &cnpy::operator+=(std::vector<char> &lhs, const char *rhs) {
+  // write in little endian
+  const size_t len = strlen(rhs);
+  lhs.reserve(len);
+  for (size_t byte = 0; byte < len; byte++) {
+    lhs.push_back(rhs[byte]);
+  }
+  return lhs;
+}
 
 template <typename T>
 void npy_save(const std::string_view fname, const T *data,
