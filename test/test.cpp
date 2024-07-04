@@ -47,10 +47,12 @@ TEST(NpySave, Npy) {
   cnpy::npy_array arr = cnpy::npy_load("arr1.npy");
   const auto *loaded_data = arr.data<std::complex<double>>();
 
+  const auto shape = arr.shape();
+
   // make sure the loaded data matches the saved data
-  ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
-  ASSERT_TRUE(arr.shape.size() == 3 && arr.shape[0] == nz &&
-              arr.shape[1] == ny && arr.shape[2] == nx);
+  ASSERT_EQ(arr.word_size(), sizeof(std::complex<double>));
+  ASSERT_TRUE(shape.size() == 3 && shape[0] == nz &&
+              shape[1] == ny && shape[2] == nx);
   for (int i = 0; i < nx * ny * nz; i++) {
     ASSERT_EQ(data[i], loaded_data[i]);
   }
@@ -69,9 +71,11 @@ TEST(NpyAppend, Npy) {
   cnpy::npy_array arr = cnpy::npy_load("arr1.npy");
   const auto *loaded_data = arr.data<std::complex<double>>();
 
-  ASSERT_EQ(arr.word_size, sizeof(std::complex<double>));
-  ASSERT_TRUE(arr.shape.size() == 3 && arr.shape[0] == nz + nz &&
-              arr.shape[1] == ny && arr.shape[2] == nx);
+  const auto shape = arr.shape();
+
+  ASSERT_EQ(arr.word_size(), sizeof(std::complex<double>));
+  ASSERT_TRUE(shape.size() == 3 && shape[0] == nz + nz &&
+              shape[1] == ny && shape[2] == nx);
   for (int i = 0; i < nx * ny * (nz + nz); i++) {
     ASSERT_EQ(expected[i], loaded_data[i]);
   }
@@ -151,7 +155,7 @@ TEST(NpzSave, Npz) {
   // check that the loaded myVar1 matches myVar1
   cnpy::npy_array arr_mv1 = my_npz["my_var1"];
   const auto *mv1 = arr_mv1.data<double>();
-  ASSERT_TRUE(arr_mv1.shape.size() == 1 && arr_mv1.shape[0] == 1);
+  ASSERT_TRUE(arr_mv1.shape().size() == 1 && arr_mv1.shape()[0] == 1);
   ASSERT_EQ(mv1[0], my_var1);
 }
 

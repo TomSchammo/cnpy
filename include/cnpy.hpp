@@ -25,35 +25,41 @@ namespace cnpy {
 struct npy_array {
   npy_array(const std::vector<size_t> &_shape, size_t _word_size,
             bool _fortran_order)
-      : shape(_shape), word_size(_word_size), fortran_order(_fortran_order), num_vals(1) {
-    for (const unsigned long i : shape) {
-      num_vals *= i;
+      : shape_(_shape), word_size_(_word_size), fortran_order_(_fortran_order), num_vals_(1) {
+    for (const unsigned long i : shape_) {
+      num_vals_ *= i;
     }
-    data_holder = std::make_shared<std::vector<char>>(num_vals * word_size);
+    data_holder_ = std::make_shared<std::vector<char>>(num_vals_ * word_size_);
   }
 
-  npy_array() : shape(0), word_size(0), fortran_order(false), num_vals(0) {}
+  npy_array() : shape_(0), word_size_(0), fortran_order_(false), num_vals_(0) {}
 
   template <typename T> T *data() {
-    return reinterpret_cast<T *>(data_holder->data());
+    return reinterpret_cast<T *>(data_holder_->data());
   }
 
   template <typename T> const T *data() const {
-    return reinterpret_cast<T *>(data_holder->data());
+    return reinterpret_cast<T *>(data_holder_->data());
   }
 
   template <typename T> std::vector<T> as_vec() const {
     const T *p = data<T>();
-    return std::vector<T>(p, p + num_vals);
+    return std::vector<T>(p, p + num_vals_);
   }
 
-  size_t num_bytes() const { return data_holder->size(); }
+  [[nodiscard]] size_t num_bytes() const { return data_holder_->size(); }
+  [[nodiscard]] size_t num_vals() const { return num_vals_; }
+  [[nodiscard]] size_t word_size() const { return word_size_; }
+  [[nodiscard]] bool fortran_order() const { return fortran_order_; }
+  [[nodiscard]] std::vector<size_t> shape() const { return shape_; }
+  [[nodiscard]] std::vector<size_t> shape() { return shape_; }
 
-  std::shared_ptr<std::vector<char>> data_holder;
-  std::vector<size_t> shape;
-  size_t word_size;
-  bool fortran_order;
-  size_t num_vals;
+private:
+  std::shared_ptr<std::vector<char>> data_holder_;
+  std::vector<size_t> shape_;
+  size_t word_size_;
+  bool fortran_order_;
+  size_t num_vals_;
 };
 
 using npz_t = std::map<std::string, npy_array>;
