@@ -130,8 +130,8 @@ TEST(NpzSave, Npz) {
   const auto data = get_data();
   // now write to an npz file
   // non-array variables are treated as 1D arrays with 1 element
-  const double my_var1 = 1.2;
-  const char my_var2 = 'a';
+  constexpr double my_var1 = 1.2;
+  constexpr char my_var2 = 'a';
   cnpy::npz_save("out.npz", "my_var1", &my_var1, {1},
                  "w"); //"w" overwrites any existing file
   cnpy::npz_save("out.npz", "my_var2", &my_var2, {1},
