@@ -40,7 +40,7 @@ TEST(NpySave, Npy) {
   const auto data = get_data();
 
   // save it to file
-  cnpy::npy_save("arr1.npy", &data[0], {nz, ny, nx}, "w");
+  cnpy::npy_save("arr1.npy", data.data(), {nz, ny, nx}, "w");
 
   // load it into a new array
   cnpy::npy_array arr = cnpy::npy_load("arr1.npy");
@@ -58,8 +58,8 @@ TEST(NpyAppend, Npy) {
 
   const auto data = get_data();
 
-  cnpy::npy_save("arr1.npy", &data[0], {nz, ny, nx}, "w");
-  cnpy::npy_save("arr1.npy", &data[0], {nz, ny, nx}, "a");
+  cnpy::npy_save("arr1.npy", data.data(), {nz, ny, nx}, "w");
+  cnpy::npy_save("arr1.npy", data.data(), {nz, ny, nx}, "a");
 
   auto expected = data;
   expected.insert(expected.end(), data.begin(), data.end());
@@ -136,7 +136,7 @@ TEST(NpzSave, Npz) {
                  "w"); //"w" overwrites any existing file
   cnpy::npz_save("out.npz", "my_var2", &my_var2, {1},
                  "a"); //"a" appends to the file we created above
-  cnpy::npz_save("out.npz", "arr1", &data[0], {nz, ny, nx},
+  cnpy::npz_save("out.npz", "arr1", data.data(), {nz, ny, nx},
                  "a"); //"a" appends to the file we created above
 
   // load a single var from the npz file

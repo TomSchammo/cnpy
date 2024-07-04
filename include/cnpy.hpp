@@ -35,11 +35,11 @@ struct npy_array {
   npy_array() : shape(0), word_size(0), fortran_order(false), num_vals(0) {}
 
   template <typename T> T *data() {
-    return reinterpret_cast<T *>(&(*data_holder)[0]);
+    return reinterpret_cast<T *>(data_holder->data());
   }
 
   template <typename T> const T *data() const {
-    return reinterpret_cast<T *>(&(*data_holder)[0]);
+    return reinterpret_cast<T *>(data_holder->data());
   }
 
   template <typename T> std::vector<T> as_vec() const {
@@ -136,7 +136,7 @@ void npy_save(std::string fname, const T *data, const std::vector<size_t> shape,
       std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
 
   fseek(fp, 0, SEEK_SET);
-  fwrite(&header[0], sizeof(char), header.size(), fp);
+  fwrite(header.data(), sizeof(char), header.size(), fp);
   fseek(fp, 0, SEEK_END);
   fwrite(data, sizeof(T), nels, fp);
   fclose(fp);
@@ -167,7 +167,7 @@ void npz_save(std::string zipname, std::string fname, const T *data,
     parse_zip_footer(fp, nrecs, global_header_size, global_header_offset);
     fseek(fp, global_header_offset, SEEK_SET);
     global_header.resize(global_header_size);
-    size_t res = fread(&global_header[0], sizeof(char), global_header_size, fp);
+    size_t res = fread(global_header.data(), sizeof(char), global_header_size, fp);
     if (res != global_header_size) {
       throw std::runtime_error(
           "npz_save: header read error while adding to existing zip");
@@ -184,7 +184,7 @@ void npz_save(std::string zipname, std::string fname, const T *data,
   size_t nbytes = nels * sizeof(T) + npy_header.size();
 
   // get the CRC of the data to be added
-  uint32_t crc = crc32(0L, reinterpret_cast<uint8_t *>(&npy_header[0]), npy_header.size());
+  uint32_t crc = crc32(0L, reinterpret_cast<uint8_t *>(npy_header.data()), npy_header.size());
   crc = crc32(crc, reinterpret_cast<const uint8_t *>(data), nels * sizeof(T));
 
   // build the local header
@@ -235,11 +235,11 @@ void npz_save(std::string zipname, std::string fname, const T *data,
   footer += static_cast<uint16_t>(0);                     // zip file comment length
 
   // write everything
-  fwrite(&local_header[0], sizeof(char), local_header.size(), fp);
-  fwrite(&npy_header[0], sizeof(char), npy_header.size(), fp);
+  fwrite(local_header.data(), sizeof(char), local_header.size(), fp);
+  fwrite(npy_header.data(), sizeof(char), npy_header.size(), fp);
   fwrite(data, sizeof(T), nels, fp);
-  fwrite(&global_header[0], sizeof(char), global_header.size(), fp);
-  fwrite(&footer[0], sizeof(char), footer.size(), fp);
+  fwrite(global_header.data(), sizeof(char), global_header.size(), fp);
+  fwrite(footer.data(), sizeof(char), footer.size(), fp);
   fclose(fp);
 }
 
@@ -248,7 +248,7 @@ void npy_save(std::string fname, const std::vector<T> data,
               std::string mode = "w") {
   std::vector<size_t> shape;
   shape.push_back(data.size());
-  npy_save(fname, &data[0], shape, mode);
+  npy_save(fname, data.data(), shape, mode);
 }
 
 template <typename T>
@@ -256,7 +256,7 @@ void npz_save(std::string zipname, std::string fname, const std::vector<T> data,
               std::string mode = "w") {
   std::vector<size_t> shape;
   shape.push_back(data.size());
-  npz_save(zipname, fname, &data[0], shape, mode);
+  npz_save(zipname, fname, data.data(), shape, mode);
 }
 
 template <typename T>
