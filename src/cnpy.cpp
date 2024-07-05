@@ -54,7 +54,7 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   uint8_t major_version = *reinterpret_cast<uint8_t *>(buffer + 6);
   uint8_t minor_version = *reinterpret_cast<uint8_t *>(buffer + 7);
   const uint16_t header_len = *reinterpret_cast<uint16_t *>(buffer + 8);
-  std::string header(reinterpret_cast<char *>(buffer + 9), header_len);
+  std::string_view header(reinterpret_cast<char *>(buffer + 9), header_len);
 
   // fortran order
   size_t loc1 = header.find("fortran_order") + 16;
@@ -68,7 +68,7 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   std::smatch sm;
   shape.clear();
 
-  std::string str_shape = header.substr(loc1 + 1, loc2 - loc1 - 1);
+  auto str_shape = std::string(header.substr(loc1 + 1, loc2 - loc1 - 1));
   while (std::regex_search(str_shape, sm, num_regex)) {
     shape.push_back(std::stoi(sm[0].str()));
     str_shape = sm.suffix().str();
@@ -84,9 +84,9 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   // char type = header[loc1+1];
   // assert(type == map_type(T));
 
-  std::string str_ws = header.substr(loc1 + 2);
+  std::string_view str_ws = header.substr(loc1 + 2);
   loc2 = str_ws.find('\'');
-  word_size = atoi(str_ws.substr(0, loc2).c_str());
+  word_size = atoi(str_ws.substr(0, loc2).data());
 }
 
 void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
