@@ -31,9 +31,9 @@ TEST(NpyLoad, Npy) {
 
   const auto *const loaded_data = arr.data<double>();
 
-  EXPECT_EQ(loaded_data[0], 1.0f);
-  EXPECT_EQ(loaded_data[1], 2.0f);
-  EXPECT_EQ(loaded_data[2], 3.0f);
+  EXPECT_EQ(loaded_data[0], 1.0F);
+  EXPECT_EQ(loaded_data[1], 2.0F);
+  EXPECT_EQ(loaded_data[2], 3.0F);
 }
 
 TEST(NpySave, Npy) {
