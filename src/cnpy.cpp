@@ -57,18 +57,18 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   std::string_view header(reinterpret_cast<char *>(buffer + 9), header_len);
 
   // fortran order
-  size_t loc1 = header.find("fortran_order") + 16;
-  fortran_order = header.substr(loc1, 4) == "True";
+  const size_t fortran_order_start = header.find("fortran_order") + 16;
+  fortran_order = header.substr(fortran_order_start, 4) == "True";
 
   // shape
-  loc1 = header.find('(');
-  size_t loc2 = header.find(')');
+  const size_t shape_start = header.find('(');
+  const size_t shape_end = header.find(')');
 
   const std::regex num_regex("[0-9][0-9]*");
   std::smatch sm;
   shape.clear();
 
-  auto str_shape = std::string(header.substr(loc1 + 1, loc2 - loc1 - 1));
+  auto str_shape = std::string(header.substr( shape_start + 1, shape_end - shape_start - 1));
   while (std::regex_search(str_shape, sm, num_regex)) {
     shape.push_back(std::stoi(sm[0].str()));
     str_shape = sm.suffix().str();
@@ -77,16 +77,16 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   // endian, word size, data type
   // byte order code | stands for not applicable.
   // not sure when this applies except for byte array
-  loc1 = header.find("descr") + 9;
-  const bool little_endian = header[loc1] == '<' || header[loc1] == '|';
+  const size_t endian_offset = header.find("descr") + 9;
+  const bool little_endian = header[endian_offset] == '<' || header[endian_offset] == '|';
   assert(little_endian);
 
   // char type = header[loc1+1];
   // assert(type == map_type(T));
 
-  std::string_view str_ws = header.substr(loc1 + 2);
-  loc2 = str_ws.find('\'');
-  word_size = atoi(str_ws.substr(0, loc2).data());
+  std::string_view str_ws = header.substr(endian_offset + 2);
+  const size_t word_size_offset = str_ws.find('\'');
+  word_size = atoi(str_ws.substr(0, word_size_offset).data());
 }
 
 void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
@@ -100,18 +100,19 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
   assert(header[header.size() - 1] == '\n');
 
   // fortran order
-  size_t loc1 = header.find("fortran_order");
-  if (loc1 == std::string::npos) {
+  size_t fortran_order_start = header.find("fortran_order");
+  // TODO: can be simplified in C++23 with std::string::contains
+  if (fortran_order_start == std::string::npos) {
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: 'fortran_order'");
   }
-  loc1 += 16;
-  fortran_order = header.substr(loc1, 4) == "True";
+  fortran_order_start += 16;
+  fortran_order = header.substr(fortran_order_start, 4) == "True";
 
   // shape
-  loc1 = header.find('(');
-  size_t loc2 = header.find(')');
-  if (loc1 == std::string::npos || loc2 == std::string::npos) {
+  const size_t shape_start = header.find('(');
+  const size_t shape_end = header.find(')');
+  if (shape_start == std::string::npos || shape_end == std::string::npos) {
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: '(' or ')'");
   }
@@ -120,7 +121,7 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
   std::smatch sm;
   shape.clear();
 
-  std::string str_shape = header.substr(loc1 + 1, loc2 - loc1 - 1);
+  std::string str_shape = header.substr(shape_start + 1, shape_end - shape_start - 1);
   while (std::regex_search(str_shape, sm, num_regex)) {
     shape.push_back(std::stoi(sm[0].str()));
     str_shape = sm.suffix().str();
@@ -129,21 +130,21 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
   // endian, word size, data type
   // byte order code | stands for not applicable.
   // not sure when this applies except for byte array
-  loc1 = header.find("descr");
-  if (loc1 == std::string::npos) {
+  size_t endian_offset = header.find("descr");
+  if (endian_offset == std::string::npos) {
     throw std::runtime_error(
         "parse_npy_header: failed to find header keyword: 'descr'");
   }
-  loc1 += 9;
-  const bool little_endian = header[loc1] == '<' || header[loc1] == '|';
+  endian_offset += 9;
+  const bool little_endian = header[endian_offset] == '<' || header[endian_offset] == '|';
   assert(little_endian);
 
   // char type = header[loc1+1];
   // assert(type == map_type(T));
 
-  std::string str_ws = header.substr(loc1 + 2);
-  loc2 = str_ws.find('\'');
-  word_size = atoi(str_ws.substr(0, loc2).c_str());
+  std::string str_ws = header.substr(endian_offset + 2);
+  const size_t word_site_offset = str_ws.find('\'');
+  word_size = atoi(str_ws.substr(0, word_site_offset).c_str());
 }
 
 void cnpy::parse_zip_footer(FILE *fp, uint16_t &nrecs,
