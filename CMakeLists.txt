@@ -11,7 +11,7 @@ find_package(ZLIB REQUIRED)
 
 include_directories(${ZLIB_INCLUDE_DIRS})
 
-add_library(cnpy SHARED "src/cnpy.cpp")
+add_library(cnpy src/cnpy.cpp include/cnpy.hpp)
 target_link_libraries(cnpy ${ZLIB_LIBRARIES})
 
 if(BUILD_TESTS)
@@ -31,12 +31,42 @@ if(BUILD_TESTS)
     gtest_discover_tests(test)
 endif()
 
-if(NOT TARGET cnpy)
-    add_library(cnpy src/cnpy.cpp include/cnpy.hpp)
+if(NOT BUILD_TESTS)
     target_include_directories(cnpy PUBLIC include)
+
+    include(GNUInstallDirs)
+
+    install(TARGETS cnpy
+            EXPORT cnpyTargets
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+    install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+    install(EXPORT cnpyTargets
+            FILE cnpyTargets.cmake
+            NAMESPACE cnpy::
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cnpy
+    )
+
+    include(CMakePackageConfigHelpers)
+
+    write_basic_package_version_file(
+            "${CMAKE_CURRENT_BINARY_DIR}/cnpyConfigVersion.cmake"
+            VERSION ${PROJECT_VERSION}
+            COMPATIBILITY SameMajorVersion
+    )
+
+    configure_file(cnpyConfig.cmake.in
+            "${CMAKE_CURRENT_BINARY_DIR}/cnpyConfig.cmake"
+            @ONLY
+    )
+
+    install(FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/cnpyConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/cnpyConfigVersion.cmake"
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cnpy
+    )
 endif()
-
-
-
-
-
