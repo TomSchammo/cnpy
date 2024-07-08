@@ -1,24 +1,11 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0 FATAL_ERROR)
-if (COMMAND cmake_policy)
-    cmake_policy(SET CMP0003 NEW)
-endif (COMMAND cmake_policy)
-
-project(CNPY)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+project(cnpy VERSION 0.0.1 LANGUAGES CXX)
 
 if (NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
 endif ()
 
-include(FetchContent)
-FetchContent_Declare(
-        googletest
-        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
-option(ENABLE_STATIC "Build static (.a) library" ON)
+option(BUILD_TESTS "Build tests" OFF)
 
 find_package(ZLIB REQUIRED)
 
@@ -26,19 +13,30 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 
 add_library(cnpy SHARED "src/cnpy.cpp")
 target_link_libraries(cnpy ${ZLIB_LIBRARIES})
-install(TARGETS "cnpy" LIBRARY DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-if (ENABLE_STATIC)
-    add_library(cnpy-static STATIC "src/cnpy.cpp")
-    set_target_properties(cnpy-static PROPERTIES OUTPUT_NAME "cnpy")
-    install(TARGETS "cnpy-static" ARCHIVE DESTINATION lib)
-endif (ENABLE_STATIC)
+if(BUILD_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+            googletest
+            URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
 
-install(FILES "include/cnpy.hpp" DESTINATION include)
-install(FILES "mat2npz" "npy2mat" "npz2mat" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    add_executable(test test/test.cpp)
+    target_link_libraries(test cnpy GTest::gtest_main)
 
-add_executable(test test/test.cpp)
-target_link_libraries(test cnpy GTest::gtest_main)
+    include(GoogleTest)
+    gtest_discover_tests(test)
+endif()
 
-include(GoogleTest)
-gtest_discover_tests(test)
+if(NOT TARGET cnpy)
+    add_library(cnpy src/cnpy.cpp include/cnpy.hpp)
+    target_include_directories(cnpy PUBLIC include)
+endif()
+
+
+
+
+
