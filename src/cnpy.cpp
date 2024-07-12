@@ -47,7 +47,6 @@ char cnpy::map_type(const std::type_info &t) {
   return '?';
 }
 
-
 void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
                             std::vector<size_t> &shape, bool &fortran_order) {
   // std::string magic_string(buffer,6);
@@ -68,7 +67,8 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   std::smatch sm;
   shape.clear();
 
-  auto str_shape = std::string(header.substr( shape_start + 1, shape_end - shape_start - 1));
+  auto str_shape =
+      std::string(header.substr(shape_start + 1, shape_end - shape_start - 1));
   while (std::regex_search(str_shape, sm, num_regex)) {
     shape.push_back(std::stoi(sm[0].str()));
     str_shape = sm.suffix().str();
@@ -78,7 +78,8 @@ void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
   // byte order code | stands for not applicable.
   // not sure when this applies except for byte array
   const size_t endian_offset = header.find("descr") + 9;
-  const bool little_endian = header[endian_offset] == '<' || header[endian_offset] == '|';
+  const bool little_endian =
+      header[endian_offset] == '<' || header[endian_offset] == '|';
   assert(little_endian);
 
   // char type = header[loc1+1];
@@ -121,7 +122,8 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
   std::smatch sm;
   shape.clear();
 
-  std::string str_shape = header.substr(shape_start + 1, shape_end - shape_start - 1);
+  std::string str_shape =
+      header.substr(shape_start + 1, shape_end - shape_start - 1);
   while (std::regex_search(str_shape, sm, num_regex)) {
     shape.push_back(std::stoi(sm[0].str()));
     str_shape = sm.suffix().str();
@@ -136,7 +138,8 @@ void cnpy::parse_npy_header(FILE *fp, size_t &word_size,
         "parse_npy_header: failed to find header keyword: 'descr'");
   }
   endian_offset += 9;
-  const bool little_endian = header[endian_offset] == '<' || header[endian_offset] == '|';
+  const bool little_endian =
+      header[endian_offset] == '<' || header[endian_offset] == '|';
   assert(little_endian);
 
   // char type = header[loc1+1];
@@ -152,7 +155,8 @@ void cnpy::parse_zip_footer(FILE *fp, uint16_t &nrecs,
                             size_t &global_header_offset) {
   std::vector<char> footer(22);
   fseek(fp, -22, SEEK_END);
-  if (const size_t res = fread(footer.data(), sizeof(char), 22, fp); res != 22) {
+  if (const size_t res = fread(footer.data(), sizeof(char), 22, fp);
+      res != 22) {
     throw std::runtime_error("parse_zip_footer: failed fread");
   }
 
@@ -291,7 +295,8 @@ cnpy::npz_t cnpy::npz_load(const std::string &fname) {
   return arrays;
 }
 
-cnpy::npy_array cnpy::npz_load(const std::string &fname, const std::string &varname) {
+cnpy::npy_array cnpy::npz_load(const std::string &fname,
+                               const std::string &varname) {
   FILE *fp = fopen(fname.c_str(), "rb");
 
   if (!fp) {

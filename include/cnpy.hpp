@@ -25,15 +25,17 @@ namespace cnpy {
 
 struct npy_array {
   constexpr npy_array(const std::vector<size_t> &shape, const size_t word_size,
-            const bool fortran_order)
-      : shape_(shape), word_size_(word_size), fortran_order_(fortran_order), num_vals_(1) {
+                      const bool fortran_order)
+      : shape_(shape), word_size_(word_size), fortran_order_(fortran_order),
+        num_vals_(1) {
     for (const unsigned long i : shape_) {
       num_vals_ *= i;
     }
     data_holder_ = std::make_shared<std::vector<char>>(num_vals_ * word_size_);
   }
 
-  constexpr npy_array() : shape_(0), word_size_(0), fortran_order_(false), num_vals_(0) {}
+  constexpr npy_array()
+      : shape_(0), word_size_(0), fortran_order_(false), num_vals_(0) {}
 
   // TODO: can this be noexcept (because of reinterpret_cast)?
   template <typename T> constexpr T *data() {
@@ -50,12 +52,22 @@ struct npy_array {
     return std::vector<T>(p, p + num_vals_);
   }
 
-  [[nodiscard]] constexpr size_t num_bytes() const noexcept { return data_holder_->size(); }
+  [[nodiscard]] constexpr size_t num_bytes() const noexcept {
+    return data_holder_->size();
+  }
   [[nodiscard]] constexpr size_t num_vals() const noexcept { return num_vals_; }
-  [[nodiscard]] constexpr size_t word_size() const noexcept { return word_size_; }
-  [[nodiscard]] constexpr bool fortran_order() const noexcept { return fortran_order_; }
-  [[nodiscard]] constexpr std::vector<size_t> shape() const noexcept { return shape_; }
-  [[nodiscard]] constexpr std::vector<size_t> shape() noexcept { return shape_; }
+  [[nodiscard]] constexpr size_t word_size() const noexcept {
+    return word_size_;
+  }
+  [[nodiscard]] constexpr bool fortran_order() const noexcept {
+    return fortran_order_;
+  }
+  [[nodiscard]] constexpr std::vector<size_t> shape() const noexcept {
+    return shape_;
+  }
+  [[nodiscard]] constexpr std::vector<size_t> shape() noexcept {
+    return shape_;
+  }
 
 private:
   std::shared_ptr<std::vector<char>> data_holder_;
@@ -94,13 +106,14 @@ constexpr std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
 // TODO: rhs cannot be a const& for some reason???
 template <>
 constexpr std::vector<char> &cnpy::operator+=(std::vector<char> &lhs,
-                                    const std::string rhs) { // NOLINT
+                                              const std::string rhs) { // NOLINT
   lhs.insert(lhs.end(), rhs.begin(), rhs.end());
   return lhs;
 }
 
 template <>
-constexpr std::vector<char> &cnpy::operator+=(std::vector<char> &lhs, const char *rhs) {
+constexpr std::vector<char> &cnpy::operator+=(std::vector<char> &lhs,
+                                              const char *rhs) {
   // write in little endian
   const size_t len = std::string_view(rhs).size();
   lhs.reserve(len);
@@ -194,7 +207,8 @@ void npz_save(const std::string_view zipname, std::string fname, const T *data,
     parse_zip_footer(fp, nrecs, global_header_size, global_header_offset);
     fseek(fp, global_header_offset, SEEK_SET);
     global_header.resize(global_header_size);
-    size_t res = fread(global_header.data(), sizeof(char), global_header_size, fp);
+    size_t res =
+        fread(global_header.data(), sizeof(char), global_header_size, fp);
     if (res != global_header_size) {
       throw std::runtime_error(
           "npz_save: header read error while adding to existing zip");
@@ -211,7 +225,8 @@ void npz_save(const std::string_view zipname, std::string fname, const T *data,
   size_t nbytes = nels * sizeof(T) + npy_header.size();
 
   // get the CRC of the data to be added
-  uint32_t crc = crc32(0L, reinterpret_cast<uint8_t *>(npy_header.data()), npy_header.size());
+  uint32_t crc = crc32(0L, reinterpret_cast<uint8_t *>(npy_header.data()),
+                       npy_header.size());
   crc = crc32(crc, reinterpret_cast<const uint8_t *>(data), nels * sizeof(T));
 
   // clang-format off
