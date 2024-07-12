@@ -59,7 +59,7 @@ if(NOT BUILD_TESTS)
             COMPATIBILITY SameMajorVersion
     )
 
-    configure_file(cnpyConfig.cmake.in
+    configure_file(cmake/cnpyConfig.cmake.in
             "${CMAKE_CURRENT_BINARY_DIR}/cnpyConfig.cmake"
             @ONLY
     )
