@@ -102,7 +102,7 @@ constexpr std::vector<char> &cnpy::operator+=(std::vector<char> &lhs,
 template <>
 constexpr std::vector<char> &cnpy::operator+=(std::vector<char> &lhs, const char *rhs) {
   // write in little endian
-  const size_t len = strlen(rhs);
+  const size_t len = std::string_view(rhs).size();
   lhs.reserve(len);
   for (size_t byte = 0; byte < len; byte++) {
     lhs.push_back(rhs[byte]);
