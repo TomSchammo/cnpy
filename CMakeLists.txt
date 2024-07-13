@@ -3,7 +3,7 @@ project(cnpy VERSION 0.0.1 LANGUAGES CXX)
 
 if (NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
-endif()
+endif ()
 
 option(BUILD_TESTS "Build tests" OFF)
 
@@ -11,13 +11,13 @@ find_package(ZLIB REQUIRED)
 
 add_library(cnpy src/cnpy.cpp)
 target_include_directories(cnpy
-    PUBLIC
+        PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 target_link_libraries(cnpy PUBLIC ZLIB::ZLIB)
 
-if(BUILD_TESTS)
+if (BUILD_TESTS)
     include(FetchContent)
     FetchContent_Declare(
             googletest
@@ -32,9 +32,9 @@ if(BUILD_TESTS)
 
     include(GoogleTest)
     gtest_discover_tests(test)
-endif()
+endif ()
 
-if(NOT BUILD_TESTS)
+if (NOT BUILD_TESTS)
     include(GNUInstallDirs)
 
     install(TARGETS cnpy
@@ -70,4 +70,4 @@ if(NOT BUILD_TESTS)
             "${CMAKE_CURRENT_BINARY_DIR}/cnpyConfigVersion.cmake"
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cnpy
     )
-endif()
+endif ()
