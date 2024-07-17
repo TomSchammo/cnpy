@@ -5,40 +5,11 @@
 
 #include "../include/cnpy.hpp"
 #include <array>
-#include <complex>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <regex>
 #include <stdexcept>
-
-char cnpy::map_type(const std::type_info &t) {
-  if (t == typeid(float) || t == typeid(double) || t == typeid(long double)) {
-    return 'f';
-  }
-
-  if (t == typeid(int) || t == typeid(char) || t == typeid(short) ||
-      t == typeid(long) || t == typeid(long long)) {
-    return 'i';
-  }
-
-  if (t == typeid(unsigned char) || t == typeid(unsigned short) ||
-      t == typeid(unsigned long) || t == typeid(unsigned long long) ||
-      t == typeid(unsigned int)) {
-    return 'u';
-  }
-
-  if (t == typeid(bool)) {
-    return 'b';
-  }
-
-  if (t == typeid(std::complex<float>) || t == typeid(std::complex<double>) ||
-      t == typeid(std::complex<long double>)) {
-    return 'c';
-  }
-
-  return '?';
-}
 
 void cnpy::parse_npy_header(unsigned char *buffer, size_t &word_size,
                             std::vector<size_t> &shape, bool &fortran_order) {

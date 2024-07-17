@@ -8,6 +8,7 @@
 
 #include <bit>
 #include <cassert>
+#include <complex>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -17,7 +18,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <string>
-#include <typeinfo>
+#include <type_traits>
 #include <vector>
 #include <zlib.h>
 
@@ -85,7 +86,40 @@ constexpr char get_endianness() {
   else
     return '>';
 }
-char map_type(const std::type_info &t);
+
+template <typename T> consteval char map_type() {
+  if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double> ||
+                std::is_same_v<T, long double>) {
+    return 'f';
+  }
+
+  if constexpr (std::is_same_v<T, int> || std::is_same_v<T, char> ||
+                std::is_same_v<T, short> || std::is_same_v<T, long> ||
+                std::is_same_v<T, long long>) {
+    return 'i';
+  }
+
+  if constexpr (std::is_same_v<T, unsigned char> ||
+                std::is_same_v<T, unsigned short> ||
+                std::is_same_v<T, unsigned long> ||
+                std::is_same_v<T, unsigned long long> ||
+                std::is_same_v<T, unsigned int>) {
+    return 'u';
+  }
+
+  if constexpr (std::is_same_v<T, bool>) {
+    return 'b';
+  }
+
+  if constexpr (std::is_same_v<T, std::complex<float>> ||
+                std::is_same_v<T, std::complex<double>> ||
+                std::is_same_v<T, std::complex<long double>>) {
+    return 'c';
+  }
+
+  return '?';
+}
+
 template <typename T>
 std::vector<char> create_npy_header(const std::vector<size_t> &shape);
 void parse_npy_header(FILE *fp, size_t &word_size, std::vector<size_t> &shape,
@@ -311,7 +345,7 @@ std::vector<char> create_npy_header(const std::vector<size_t> &shape) {
   std::vector<char> dict;
   dict += "{'descr': '";
   dict += get_endianness();
-  dict += map_type(typeid(T));
+  dict += map_type<T>();
   dict += std::to_string(sizeof(T));
   dict += "', 'fortran_order': False, 'shape': (";
   dict += std::to_string(shape[0]);
