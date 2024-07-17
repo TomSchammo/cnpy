@@ -14,11 +14,6 @@
 #include <regex>
 #include <stdexcept>
 
-char cnpy::big_endian_test() {
-  int x = 1;
-  return reinterpret_cast<char *>(&x)[0] ? '<' : '>';
-}
-
 char cnpy::map_type(const std::type_info &t) {
   if (t == typeid(float) || t == typeid(double) || t == typeid(long double)) {
     return 'f';

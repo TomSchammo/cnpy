@@ -6,6 +6,7 @@
 #ifndef LIBCNPY_HPP
 #define LIBCNPY_HPP
 
+#include <bit>
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
@@ -79,7 +80,12 @@ private:
 
 using npz_t = std::map<std::string, npy_array>;
 
-char big_endian_test();
+constexpr char big_endian_test() {
+  if constexpr (std::endian::native == std::endian::little)
+    return '<';
+  else
+    return '>';
+}
 char map_type(const std::type_info &t);
 template <typename T>
 std::vector<char> create_npy_header(const std::vector<size_t> &shape);
