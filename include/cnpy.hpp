@@ -80,7 +80,7 @@ private:
 
 using npz_t = std::map<std::string, npy_array>;
 
-constexpr char get_endianness() {
+consteval char get_endianness() {
   if constexpr (std::endian::native == std::endian::little)
     return '<';
   else
