@@ -4,13 +4,11 @@
 // http://www.opensource.org/licenses/mit-license.php
 
 #include "../include/cnpy.hpp"
-#include <algorithm>
 #include <array>
 #include <complex>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <iomanip>
 #include <regex>
 #include <stdexcept>
 

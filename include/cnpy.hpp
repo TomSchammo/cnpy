@@ -15,7 +15,6 @@
 #include <map>
 #include <memory>
 #include <numeric>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
