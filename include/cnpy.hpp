@@ -80,7 +80,7 @@ private:
 
 using npz_t = std::map<std::string, npy_array>;
 
-constexpr char big_endian_test() {
+constexpr char get_endianness() {
   if constexpr (std::endian::native == std::endian::little)
     return '<';
   else
@@ -311,7 +311,7 @@ std::vector<char> create_npy_header(const std::vector<size_t> &shape) {
 
   std::vector<char> dict;
   dict += "{'descr': '";
-  dict += big_endian_test();
+  dict += get_endianness();
   dict += map_type(typeid(T));
   dict += std::to_string(sizeof(T));
   dict += "', 'fortran_order': False, 'shape': (";
