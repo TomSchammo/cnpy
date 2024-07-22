@@ -10,11 +10,15 @@ option(BUILD_TESTS "Build tests" OFF)
 find_package(ZLIB REQUIRED)
 
 add_library(cnpy src/cnpy.cpp)
+
 target_include_directories(cnpy
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
+
+add_library(cnpy::cnpy ALIAS cnpy)
+
 target_link_libraries(cnpy PUBLIC ZLIB::ZLIB)
 
 if (BUILD_TESTS)
@@ -44,13 +48,14 @@ if (NOT BUILD_TESTS)
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
-    install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     install(EXPORT cnpyTargets
             FILE cnpyTargets.cmake
-            NAMESPACE cnpy::
+            # NAMESPACE cnpy::
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cnpy
     )
+
+    install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     include(CMakePackageConfigHelpers)
 
