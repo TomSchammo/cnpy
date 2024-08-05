@@ -3,7 +3,7 @@
 // license available in LICENSE file, or at
 // http://www.opensource.org/licenses/mit-license.php
 
-#include "../include/cnpy.hpp"
+#include "../include/cnpy/cnpy.hpp"
 #include <array>
 #include <cstdint>
 #include <cstdlib>

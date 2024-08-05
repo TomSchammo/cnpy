@@ -1,4 +1,4 @@
-#include "../include/cnpy.hpp"
+#include "../include/cnpy/cnpy.hpp"
 #include <complex>
 #include <gtest/gtest.h>
 #include <map>
