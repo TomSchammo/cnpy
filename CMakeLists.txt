@@ -51,7 +51,7 @@ if (NOT BUILD_TESTS)
 
     install(EXPORT cnpyTargets
             FILE cnpyTargets.cmake
-            # NAMESPACE cnpy::
+            NAMESPACE cnpy::
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cnpy
     )
 
