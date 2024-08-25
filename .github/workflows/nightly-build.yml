@@ -1,0 +1,72 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # This will run the workflow every day at midnight UTC
+
+jobs:
+  build-and-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Set up Zlib
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y zlib1g-dev
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            brew install zlib
+          fi
+
+      - name: Build project
+        run: |
+          mkdir build
+          cd build
+          # Configure CMake with static linking options
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            cmake -DCMAKE_BUILD_TYPE=Release -DZLIB_LIBRARY=/usr/lib/x86_64-linux-gnu/libz.a ..
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            cmake -DCMAKE_BUILD_TYPE=Release -DZLIB_LIBRARY=/opt/homebrew/lib/libz.a ..
+          fi
+          cmake --build . --config Release
+
+      - name: Create release asset
+        run: |
+          mkdir -p release
+          cp build/cnpy.a release/
+          tar -czf release/${{ matrix.os }}-cnpy-nightly.tar.gz -C release cnpy.a
+
+      - name: Upload release assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-cnpy-nightly
+          path: release/${{ matrix.os }}-cnpy-nightly.tar.gz
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: build-and-release
+    steps:
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ubuntu-latest-cnpy-nightly
+          path: release
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-latest-cnpy-nightly
+          path: release
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
