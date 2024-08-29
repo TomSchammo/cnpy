@@ -1,3 +1,7 @@
+# NOTE
+
+**I am currently rewriting this to use modern C++ and best practices. So this README is currently out of date.**
+
 # Purpose:
 
 NumPy offers the `save` method for easy saving of arrays into .npy and `savez` for zipping multiple .npy arrays together
