@@ -39,8 +39,8 @@ jobs:
       - name: Create release asset
         run: |
           mkdir -p release
-          cp build/cnpy.a release/
-          tar -czf release/${{ matrix.os }}-cnpy-nightly.tar.gz -C release cnpy.a
+          cp build/libcnpy.a release/
+          tar -czf release/${{ matrix.os }}-cnpy-nightly.tar.gz -C release libcnpy.a
 
       - name: Upload release assets
         uses: actions/upload-artifact@v3
