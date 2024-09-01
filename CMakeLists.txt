@@ -5,6 +5,8 @@ if (NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
 endif ()
 
+add_compile_options(-fPIC)
+
 option(BUILD_TESTS "Build tests" OFF)
 
 find_package(ZLIB REQUIRED)
