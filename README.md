@@ -21,15 +21,29 @@ type of your choice.
 
 # Installation:
 
-Default installation directory is /usr/local.
-To specify a different directory, add `-DCMAKE_INSTALL_PREFIX=/path/to/install/dir` to the cmake invocation in step 4.
+There are two ways to use the library:
 
-1. get [cmake](www.cmake.org)
-2. create a build directory, say $HOME/build
-3. cd $HOME/build
-4. cmake /path/to/cnpy
-5. make
-6. make install
+## 1. Using CMake:
+
+Just include this into your `CMakeLists.txt`.
+```cmake
+include(FetchContent)
+FetchContent_Declare(cnpy
+        GIT_REPOSITORY "https://github.com/TomSchammo/cnpy"
+        GIT_SHALLOW True
+)
+FetchContent_MakeAvailable(cnpy)
+```
+
+This library needs support for C++20 features, so at least GCC 13 and setting the `CMAKE_CXX_STANDARD` to 20 or above are required.
+
+## 2. By installing the library on your system:
+
+1. Install [cmake](www.cmake.org) and [git](https://git-scm.com/)
+2. Run `git clone https://github.com/TomSchammo/cnpy` and `cd cnpy`
+3. Create a build directory and change into it using `mkdir build` and `cd build`
+4. Run CMake: `cmake ..`. This library uses the new dual ABI by default. If you need support for the legacy ABI, don't forget to set the flags using `-DCMAKE_CXX_FLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"`
+5. Run `make` to build and `make install` to install the project.
 
 # Using:
 
