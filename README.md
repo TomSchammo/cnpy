@@ -47,11 +47,9 @@ This library needs support for C++20 features, so at least GCC 13 and setting th
 
 # Using:
 
-To use, `#include"cnpy.h"` in your source code. Compile the source code mycode.cpp as
-
-```bash
-g++ -o mycode mycode.cpp -L/path/to/install/dir -lcnpy -lz --std=c++11
-```
+To use the library, include the `cnpy/cnpy.hpp` header in your source code.
+It is necessary to link against [zlib](https://www.zlib.net/) when building your library.
+The flag for that should be `-lz`.
 
 # Description:
 
