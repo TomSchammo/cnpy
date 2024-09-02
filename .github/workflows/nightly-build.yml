@@ -19,7 +19,9 @@ jobs:
         run: |
           if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
             sudo apt-get update
-            sudo apt-get install -y zlib1g-dev
+            sudo apt-get install -y zlib1g-dev gcc-13 g++-13
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 50
+            sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 50
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             brew install zlib
           fi
