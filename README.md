@@ -67,12 +67,9 @@ underlying datatype of the data).
 The array shape and word size are read from the npy header.
 
 ```c++
-struct NpyArray {
+struct npy_array {
     std::vector<size_t> shape;
     size_t word_size;
     template<typename T> T* data();
 };
 ```
-
-See [example1.cpp](test/example1.cpp) for examples of how to use the library. example1 will also be build during cmake
-installation.
