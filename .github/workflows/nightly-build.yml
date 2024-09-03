@@ -18,6 +18,7 @@ jobs:
       - name: Set up Zlib
         run: |
           if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
             sudo apt-get update
             sudo apt-get install -y zlib1g-dev gcc-13 g++-13
             sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 50
