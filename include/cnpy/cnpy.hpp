@@ -142,10 +142,9 @@ constexpr std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
   return lhs;
 }
 
-// TODO: rhs cannot be a const& for some reason???
 template <>
 constexpr std::vector<char> &operator+=(std::vector<char> &lhs,
-                                        const std::string rhs) { // NOLINT
+                                        const std::string rhs) {
   lhs.insert(lhs.end(), rhs.begin(), rhs.end());
   return lhs;
 }
