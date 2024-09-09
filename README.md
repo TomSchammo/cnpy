@@ -39,7 +39,7 @@ This library needs support for C++20 features, so at least GCC 13 and setting th
 
 ## 2. By installing the library on your system:
 
-1. Install [cmake](www.cmake.org) and [git](https://git-scm.com/)
+1. Install [cmake](https://www.cmake.org) and [git](https://git-scm.com/)
 2. Run `git clone https://github.com/TomSchammo/cnpy` and `cd cnpy`
 3. Create a build directory and change into it using `mkdir build` and `cd build`
 4. Run CMake: `cmake ..`. This library uses the new dual ABI by default. If you need support for the legacy ABI, don't forget to set the flags using `-DCMAKE_CXX_FLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"`
