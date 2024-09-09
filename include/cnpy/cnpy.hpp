@@ -144,15 +144,15 @@ constexpr std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
 
 // TODO: rhs cannot be a const& for some reason???
 template <>
-constexpr std::vector<char> &cnpy::operator+=(std::vector<char> &lhs,
-                                              const std::string rhs) { // NOLINT
+constexpr std::vector<char> &operator+=(std::vector<char> &lhs,
+                                        const std::string rhs) { // NOLINT
   lhs.insert(lhs.end(), rhs.begin(), rhs.end());
   return lhs;
 }
 
 template <>
-constexpr std::vector<char> &cnpy::operator+=(std::vector<char> &lhs,
-                                              const char *rhs) {
+constexpr std::vector<char> &operator+=(std::vector<char> &lhs,
+                                        const char *rhs) {
   // write in little endian
   const size_t len = std::string_view(rhs).size();
   lhs.reserve(len);
