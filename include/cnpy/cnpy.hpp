@@ -25,8 +25,8 @@
 namespace cnpy {
 
 struct npy_array {
-  constexpr npy_array(const std::vector<size_t> &shape, const size_t word_size,
-                      const bool fortran_order)
+  npy_array(const std::vector<size_t> &shape, const size_t word_size,
+            const bool fortran_order)
       : shape_(shape), word_size_(word_size), fortran_order_(fortran_order),
         num_vals_(1) {
     for (const unsigned long i : shape_) {
@@ -35,8 +35,7 @@ struct npy_array {
     data_holder_ = std::make_shared<std::vector<char>>(num_vals_ * word_size_);
   }
 
-  constexpr npy_array()
-      : shape_(0), word_size_(0), fortran_order_(false), num_vals_(0) {}
+  npy_array() : shape_(0), word_size_(0), fortran_order_(false), num_vals_(0) {}
 
   // TODO: can this be noexcept (because of reinterpret_cast)?
   template <typename T> constexpr T *data() {
@@ -53,7 +52,7 @@ struct npy_array {
     return std::vector<T>(p, p + num_vals_);
   }
 
-  [[nodiscard]] constexpr size_t num_bytes() const noexcept {
+  [[nodiscard]] size_t num_bytes() const noexcept {
     return data_holder_->size();
   }
   [[nodiscard]] constexpr size_t num_vals() const noexcept { return num_vals_; }
@@ -63,12 +62,10 @@ struct npy_array {
   [[nodiscard]] constexpr bool fortran_order() const noexcept {
     return fortran_order_;
   }
-  [[nodiscard]] constexpr std::vector<size_t> shape() const noexcept {
+  [[nodiscard]] inline std::vector<size_t> shape() const noexcept {
     return shape_;
   }
-  [[nodiscard]] constexpr std::vector<size_t> shape() noexcept {
-    return shape_;
-  }
+  [[nodiscard]] inline std::vector<size_t> shape() noexcept { return shape_; }
 
 private:
   std::shared_ptr<std::vector<char>> data_holder_;
@@ -80,14 +77,15 @@ private:
 
 using npz_t = std::map<std::string, npy_array>;
 
-consteval char get_endianness() {
-  if constexpr (std::endian::native == std::endian::little)
-    return '<';
-  else
-    return '>';
+inline char get_endianness() {
+
+  // unfotunately std::endian has only been added in C++20, so I stole this from
+  // https://stackoverflow.com/questions/8978935/detecting-endianness
+  int i = 1;
+  return *((char *)&i) ? '<' : '>';
 }
 
-template <typename T> consteval char map_type() {
+template <typename T> constexpr char map_type() {
   if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double> ||
                 std::is_same_v<T, long double>) {
     return 'f';
@@ -143,15 +141,14 @@ constexpr std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
 }
 
 template <>
-constexpr std::vector<char> &operator+=(std::vector<char> &lhs,
-                                        const std::string rhs) {
+inline std::vector<char> &operator+=(std::vector<char> &lhs,
+                                     const std::string rhs) {
   lhs.insert(lhs.end(), rhs.begin(), rhs.end());
   return lhs;
 }
 
 template <>
-constexpr std::vector<char> &operator+=(std::vector<char> &lhs,
-                                        const char *rhs) {
+inline std::vector<char> &operator+=(std::vector<char> &lhs, const char *rhs) {
   // write in little endian
   const size_t len = std::string_view(rhs).size();
   lhs.reserve(len);
