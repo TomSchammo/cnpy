@@ -6,7 +6,6 @@
 #ifndef LIBCNPY_HPP
 #define LIBCNPY_HPP
 
-#include <bit>
 #include <cassert>
 #include <complex>
 #include <cstdint>
