@@ -131,9 +131,9 @@ void parse_npy_header(unsigned char *buffer, size_t &word_size,
                       std::vector<size_t> &shape, bool &fortran_order);
 void parse_zip_footer(FILE *fp, uint16_t &nrecs, size_t &global_header_size,
                       size_t &global_header_offset);
-npz_t npz_load(const std::string &fname);
-npy_array npz_load(const std::string &fname, const std::string &varname);
-npy_array npy_load(const std::string &fname);
+[[nodiscard]] npz_t npz_load(const std::string &fname);
+[[nodiscard]] npy_array npz_load(const std::string &fname, const std::string &varname);
+[[nodiscard]] npy_array npy_load(const std::string &fname);
 
 template <typename T>
 constexpr std::vector<char> &operator+=(std::vector<char> &lhs, const T rhs) {
