@@ -162,20 +162,20 @@ cnpy::npy_array load_the_npz_array(FILE *fp, const uint32_t compr_bytes,
     throw std::runtime_error("load_the_npy_file: failed fread");
   }
 
-  z_stream d_stream;
-
-  d_stream.zalloc = nullptr;
-  d_stream.zfree = nullptr;
-  d_stream.opaque = nullptr;
-  d_stream.avail_in = 0;
-  d_stream.next_in = nullptr;
-  int err = inflateInit2(&d_stream, -MAX_WBITS);
+  z_stream d_stream{
+      .zalloc = nullptr,
+      .zfree = nullptr,
+      .opaque = nullptr,
+      .avail_in = 0,
+      .next_in = nullptr
+  };
 
   d_stream.avail_in = compr_bytes;
   d_stream.next_in = buffer_compr.data();
   d_stream.avail_out = uncompr_bytes;
   d_stream.next_out = buffer_uncompr.data();
 
+  int err = inflateInit2(&d_stream, -MAX_WBITS);
   err = inflate(&d_stream, Z_FINISH);
   err = inflateEnd(&d_stream);
 
