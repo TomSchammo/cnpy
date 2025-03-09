@@ -3,3 +3,4 @@ build_files/
 .idea
 compile_commands.json
 .cache/
+.vscode/
