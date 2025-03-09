@@ -193,8 +193,8 @@ cnpy::npy_array load_the_npz_array(FILE *fp, const uint32_t compr_bytes,
   return array;
 }
 
-cnpy::npz_t cnpy::npz_load(const std::string &fname) {
-  FILE *fp = fopen(fname.c_str(), "rb");
+cnpy::npz_t cnpy::npz_load(std::string_view fname) {
+  FILE *fp = fopen(fname.data(), "rb");
 
   if (!fp) {
     throw std::runtime_error(
@@ -258,9 +258,8 @@ cnpy::npz_t cnpy::npz_load(const std::string &fname) {
   return arrays;
 }
 
-cnpy::npy_array cnpy::npz_load(const std::string &fname,
-                               const std::string &varname) {
-  FILE *fp = fopen(fname.c_str(), "rb");
+cnpy::npy_array cnpy::npz_load(std::string_view fname, std::string_view varname) {
+  FILE *fp = fopen(fname.data(), "rb");
 
   if (!fp) {
     throw std::runtime_error(
@@ -322,9 +321,9 @@ cnpy::npy_array cnpy::npz_load(const std::string &fname,
       "npz_load: Variable name {} not found in {}", varname, fname));
 }
 
-cnpy::npy_array cnpy::npy_load(const std::string &fname) {
+cnpy::npy_array cnpy::npy_load(std::string_view fname) {
 
-  FILE *fp = fopen(fname.c_str(), "rb");
+  FILE *fp = fopen(fname.data(), "rb");
 
   if (!fp) {
     throw std::runtime_error(
