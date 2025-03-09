@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <format>
 #include <regex>
 #include <stdexcept>
 
@@ -198,8 +199,8 @@ cnpy::npz_t cnpy::npz_load(const std::string &fname) {
   FILE *fp = fopen(fname.c_str(), "rb");
 
   if (!fp) {
-    throw std::runtime_error("npz_load: Error! Unable to open file " + fname +
-                             "!");
+    throw std::runtime_error(
+        std::format("npz_load: Error! Unable to open file {}!", fname));
   }
 
   cnpy::npz_t arrays;
@@ -264,7 +265,8 @@ cnpy::npy_array cnpy::npz_load(const std::string &fname,
   FILE *fp = fopen(fname.c_str(), "rb");
 
   if (!fp) {
-    throw std::runtime_error("npz_load: Unable to open file " + fname);
+    throw std::runtime_error(
+        std::format("npz_load: Unable to open file {}", fname));
   }
 
   while (true) {
@@ -318,8 +320,8 @@ cnpy::npy_array cnpy::npz_load(const std::string &fname,
   fclose(fp);
 
   // if we get here, we haven't found the variable in the file
-  throw std::runtime_error("npz_load: Variable name " + varname +
-                           " not found in " + fname);
+  throw std::runtime_error(std::format(
+      "npz_load: Variable name {} not found in {}", varname, fname));
 }
 
 cnpy::npy_array cnpy::npy_load(const std::string &fname) {
@@ -327,7 +329,8 @@ cnpy::npy_array cnpy::npy_load(const std::string &fname) {
   FILE *fp = fopen(fname.c_str(), "rb");
 
   if (!fp) {
-    throw std::runtime_error("npy_load: Unable to open file " + fname);
+    throw std::runtime_error(
+        std::format("npy_load: Unable to open file {}", fname));
   }
 
   npy_array arr = load_the_npy_file(fp);
