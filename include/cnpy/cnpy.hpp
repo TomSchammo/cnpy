@@ -64,10 +64,10 @@ struct npy_array {
   [[nodiscard]] constexpr bool fortran_order() const noexcept {
     return fortran_order_;
   }
-  [[nodiscard]] constexpr std::vector<size_t> shape() const noexcept {
+  [[nodiscard]] constexpr const std::vector<size_t>& shape() const noexcept {
     return shape_;
   }
-  [[nodiscard]] constexpr std::vector<size_t> shape() noexcept {
+  [[nodiscard]] constexpr std::vector<size_t>& shape() noexcept {
     return shape_;
   }
 
