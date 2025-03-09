@@ -16,12 +16,12 @@
 #include <map>
 #include <memory>
 #include <numeric>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <vector>
 #include <zlib.h>
-#include <ranges>
 
 namespace cnpy {
 
@@ -64,10 +64,10 @@ struct npy_array {
   [[nodiscard]] constexpr bool fortran_order() const noexcept {
     return fortran_order_;
   }
-  [[nodiscard]] constexpr const std::vector<size_t>& shape() const noexcept {
+  [[nodiscard]] constexpr const std::vector<size_t> &shape() const noexcept {
     return shape_;
   }
-  [[nodiscard]] constexpr std::vector<size_t>& shape() noexcept {
+  [[nodiscard]] constexpr std::vector<size_t> &shape() noexcept {
     return shape_;
   }
 
@@ -132,7 +132,8 @@ void parse_npy_header(unsigned char *buffer, size_t &word_size,
 void parse_zip_footer(FILE *fp, uint16_t &nrecs, size_t &global_header_size,
                       size_t &global_header_offset);
 [[nodiscard]] npz_t npz_load(std::string_view fname);
-[[nodiscard]] npy_array npz_load(std::string_view fname, std::string_view varname);
+[[nodiscard]] npy_array npz_load(std::string_view fname,
+                                 std::string_view varname);
 [[nodiscard]] npy_array npy_load(std::string_view fname);
 
 template <typename T>
@@ -351,7 +352,7 @@ std::vector<char> create_npy_header(const std::vector<size_t> &shape) {
   dict += std::to_string(sizeof(T));
   dict += "', 'fortran_order': False, 'shape': (";
   dict += std::to_string(shape[0]);
-  for (const auto& dim : std::views::drop(shape, 1)) {
+  for (const auto &dim : std::views::drop(shape, 1)) {
     dict += ", ";
     dict += std::to_string(dim);
   }
