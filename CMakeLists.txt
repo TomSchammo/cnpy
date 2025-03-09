@@ -11,7 +11,7 @@ option(BUILD_TESTS "Build tests" OFF)
 
 find_package(ZLIB REQUIRED)
 
-add_library(cnpy src/cnpy.cpp)
+add_library(cnpy src/cnpy.cpp src/file_handler.cpp)
 
 target_include_directories(cnpy
         PUBLIC
