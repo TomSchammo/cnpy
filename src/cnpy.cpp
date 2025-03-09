@@ -4,6 +4,7 @@
 // http://www.opensource.org/licenses/mit-license.php
 
 #include "../include/cnpy/cnpy.hpp"
+#include "cnpy/file_handler.hpp"
 #include <array>
 #include <cstdint>
 #include <cstdlib>
@@ -258,7 +259,8 @@ cnpy::npz_t cnpy::npz_load(std::string_view fname) {
   return arrays;
 }
 
-cnpy::npy_array cnpy::npz_load(std::string_view fname, std::string_view varname) {
+cnpy::npy_array cnpy::npz_load(std::string_view fname,
+                               std::string_view varname) {
   FILE *fp = fopen(fname.data(), "rb");
 
   if (!fp) {
@@ -323,15 +325,17 @@ cnpy::npy_array cnpy::npz_load(std::string_view fname, std::string_view varname)
 
 cnpy::npy_array cnpy::npy_load(std::string_view fname) {
 
-  FILE *fp = fopen(fname.data(), "rb");
+  auto handler = FileHandler(fname, "rb");
 
-  if (!fp) {
+  if (handler.is_open()) {
+
+    npy_array arr = load_the_npy_file(handler.get());
+    return arr;
+
+  } else {
+
+    // TODO maybe use std::optional instead of an exception here?
     throw std::runtime_error(
         std::format("npy_load: Unable to open file {}", fname));
   }
-
-  npy_array arr = load_the_npy_file(fp);
-
-  fclose(fp);
-  return arr;
 }
