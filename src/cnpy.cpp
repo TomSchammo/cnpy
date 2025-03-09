@@ -163,13 +163,11 @@ cnpy::npy_array load_the_npz_array(FILE *fp, const uint32_t compr_bytes,
     throw std::runtime_error("load_the_npy_file: failed fread");
   }
 
-  z_stream d_stream{
-      .zalloc = nullptr,
-      .zfree = nullptr,
-      .opaque = nullptr,
-      .avail_in = 0,
-      .next_in = nullptr
-  };
+  z_stream d_stream{.zalloc = nullptr,
+                    .zfree = nullptr,
+                    .opaque = nullptr,
+                    .avail_in = 0,
+                    .next_in = nullptr};
 
   d_stream.avail_in = compr_bytes;
   d_stream.next_in = buffer_compr.data();
