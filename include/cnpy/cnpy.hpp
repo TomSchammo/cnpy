@@ -21,6 +21,7 @@
 #include <type_traits>
 #include <vector>
 #include <zlib.h>
+#include <ranges>
 
 namespace cnpy {
 
@@ -350,9 +351,9 @@ std::vector<char> create_npy_header(const std::vector<size_t> &shape) {
   dict += std::to_string(sizeof(T));
   dict += "', 'fortran_order': False, 'shape': (";
   dict += std::to_string(shape[0]);
-  for (size_t i = 1; i < shape.size(); i++) {
+  for (const auto& dim : std::views::drop(shape, 1)) {
     dict += ", ";
-    dict += std::to_string(shape[i]);
+    dict += std::to_string(dim);
   }
   if (shape.size() == 1) {
     dict += ",";
